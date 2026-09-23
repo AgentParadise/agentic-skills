@@ -1,4 +1,5 @@
 ---
+name: prioritize
 description: Prioritize review comments by severity
 model: sonnet
 allowed-tools: Read

@@ -1,0 +1,9 @@
+{
+  "name": "meta",
+  "description": "Authoring and testing agent instructions and skills",
+  "skills": [
+    "meta/authoring-agents-md",
+    "meta/authoring-skills",
+    "meta/skill-testing"
+  ]
+}

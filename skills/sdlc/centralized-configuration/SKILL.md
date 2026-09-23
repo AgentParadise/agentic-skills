@@ -1,4 +1,5 @@
 ---
+name: centralized-configuration
 description: Type-safe, self-documenting environment configuration with idempotent sync
 model: sonnet
 allowed-tools: Read, Write, Shell

@@ -1,0 +1,11 @@
+[package]
+name = "agentic-skills"
+description = "Install and validate named collections from the Agentic Skills catalog"
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+version.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true

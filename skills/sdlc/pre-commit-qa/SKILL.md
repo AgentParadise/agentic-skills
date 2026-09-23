@@ -1,4 +1,5 @@
 ---
+name: pre-commit-qa
 description: Run standardized QA checks before committing changes
 argument-hint: [--fix to auto-fix issues]
 model: sonnet

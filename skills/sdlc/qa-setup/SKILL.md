@@ -1,4 +1,5 @@
 ---
+name: qa-setup
 description: Verify or create standardized QA commands for polyglot projects
 argument-hint: [audit|setup|--runner=just|npm|uv]
 model: sonnet
@@ -286,4 +287,3 @@ Run `/qa-setup setup` to generate missing commands, or manually add them to your
 ```
 /qa-setup audit
 ```
-

@@ -1,4 +1,5 @@
 ---
+name: review
 description: Review implementation against project plan and verify completeness
 argument-hint: <path-to-project-plan.md>
 model: sonnet

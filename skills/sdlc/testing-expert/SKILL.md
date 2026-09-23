@@ -1,4 +1,5 @@
 ---
+name: testing-expert
 description: Expert knowledge for analyzing testing architecture and planning improvements
 model: sonnet
 allowed-tools: Read, Grep, Glob, Bash

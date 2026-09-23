@@ -1,4 +1,5 @@
 ---
+name: env-management
 description: Set up auto-generated .env.example with idempotent .env sync from typed settings. Works in both interactive (human-in-loop) and headless (automated workspace) contexts.
 argument-hint: "[language] - python (default), typescript, go"
 model: sonnet

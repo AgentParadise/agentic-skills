@@ -1,4 +1,5 @@
 ---
+name: commit
 description: Create conventional commits with proper formatting
 argument-hint: "[type] [scope] [message] - or leave blank for interactive"
 model: sonnet

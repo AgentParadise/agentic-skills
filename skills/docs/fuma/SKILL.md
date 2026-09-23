@@ -1,4 +1,5 @@
 ---
+name: fuma
 description: Fumadocs styling patterns and component guidelines
 model: sonnet
 allowed-tools: Read, Write

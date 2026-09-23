@@ -1,4 +1,5 @@
 ---
+name: browser
 description: Headless browser automation using Playwright CLI for UI testing, visual QA, and web scraping
 argument-hint: "<url> [headed] [vision]"
 model: sonnet

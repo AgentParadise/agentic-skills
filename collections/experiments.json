@@ -1,0 +1,7 @@
+{
+  "name": "experiments",
+  "description": "Repeatable software experiments",
+  "skills": [
+    "experiments/running-experiments"
+  ]
+}

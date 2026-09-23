@@ -1,4 +1,5 @@
 ---
+name: security-hardening
 description: Audit and harden repository security — supply chain, CI/CD scanners, secrets, credentials
 argument-hint: "[audit|fix|both] - default: both"
 model: opus

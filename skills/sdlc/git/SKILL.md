@@ -1,4 +1,5 @@
 ---
+name: git
 description: Git workflows — push, merge, PR lifecycle, worktrees, branch management, and CI integration. Invoke for any git operation beyond a simple commit.
 argument-hint: "[push|merge|worktree|fetch|pr] [options]"
 model: sonnet

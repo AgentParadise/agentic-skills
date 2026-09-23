@@ -1,0 +1,9 @@
+{
+  "name": "docs",
+  "description": "Documentation sites and visual technical artifacts",
+  "skills": [
+    "docs/fuma",
+    "docs/html-guide",
+    "docs/system-infographic"
+  ]
+}
