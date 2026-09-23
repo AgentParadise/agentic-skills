@@ -79,6 +79,45 @@ claude -p --verbose \
   "$TASK_PROMPT"
 ```
 
+## Read-only PR review with a saved result
+
+The write-capable recipe above is unsuitable for independent review. Prepare
+the diff outside the reviewer, allow only file-reading tools, and save the
+terminal JSON separately from stderr. Run from a clean checkout. Set
+`BASE_REF` to the PR target branch if it is not `origin/main`:
+
+```sh
+set -eu
+test -z "$(git status --porcelain)"
+review_dir=$(mktemp -d)
+base=$(git merge-base HEAD "${BASE_REF:-origin/main}")
+git diff --no-ext-diff --unified=40 "$base" HEAD > "$review_dir/change.diff"
+test -s "$review_dir/change.diff"
+
+claude -p \
+  --safe-mode --restricted --strict-mcp-config \
+  --tools 'Read,Glob,Grep' --add-dir "$review_dir" \
+  --permission-mode dontAsk --permission-prompts none \
+  --output-format json --max-budget-usd 3 \
+  "Review $review_dir/change.diff against the current checkout. Do not edit files.
+Return actionable findings ordered by severity with file:line references,
+or exactly NO MATERIAL FINDINGS." \
+  > "$review_dir/result.json" 2> "$review_dir/stderr.txt"
+
+jq -e '.type == "result" and .is_error == false and
+  (.result | type == "string" and length > 0)' "$review_dir/result.json" >/dev/null
+jq -r '.result' "$review_dir/result.json"
+```
+
+Keep `result.json` and `stderr.txt` as caller-owned review artifacts. A missing,
+empty, invalid, or error result is a failed review, never approval. If the
+reviewer runs asynchronously, wait for that process to exit before checking
+the result. `--safe-mode` disables project customizations, `--restricted`
+limits tool access, and the explicit tool list excludes Bash and write tools.
+Do not pair `Bash` with `bypassPermissions` in a recipe labeled read-only.
+The flags above were checked against Claude Code 2.1.280 help; recheck them
+when updating the CLI pin.
+
 ### Per-flag rationale
 
 - **`--verbose` + `--output-format stream-json`** - required *together*. Text mode hides tool calls and is unscoreable (S7 footgun: stream-json with `--print` errors without `--verbose`). If you only set one, the transcript is useless for triage.
