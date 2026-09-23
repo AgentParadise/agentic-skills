@@ -97,7 +97,7 @@ test -s "$review_dir/change.diff"
 claude -p \
   --safe-mode --restricted --strict-mcp-config \
   --tools 'Read,Glob,Grep' --add-dir "$review_dir" \
-  --permission-mode dontAsk --permission-prompts none \
+  --permission-mode dontAsk \
   --output-format json --max-budget-usd 3 \
   "Review $review_dir/change.diff against the current checkout. Do not edit files.
 Return actionable findings ordered by severity with file:line references,
@@ -115,8 +115,8 @@ reviewer runs asynchronously, wait for that process to exit before checking
 the result. `--safe-mode` disables project customizations, `--restricted`
 limits tool access, and the explicit tool list excludes Bash and write tools.
 Do not pair `Bash` with `bypassPermissions` in a recipe labeled read-only.
-The flags above were checked against Claude Code 2.1.280 help; recheck them
-when updating the CLI pin.
+The flags above were checked against Claude Code 2.1.250 and 2.1.280 help;
+recheck them when updating the CLI pin.
 
 ### Per-flag rationale
 
