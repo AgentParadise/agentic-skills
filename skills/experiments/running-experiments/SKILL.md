@@ -66,6 +66,18 @@ An experiment is for a question whose outcome you don't already know. Debugging,
 
 6. **Tool guidance is dated and isolated.** Specific commands (`pnpm harness boot --bug …`, `rtk pnpm …`, LogsQL projections) live in `## Recommended tools and practices` so they can rot without taking the principles down with them.
 
+7. **Prove each condition ran.** A configured treatment is not an applied treatment. Before comparing outcomes, find its trace in a tool event, output file, or persisted field. Otherwise a supposed A/B comparison may be two baseline runs.
+
+8. **Recalculate decision-driving numbers.** Re-run the query or count behind any number that would change the verdict, including numbers reported by a subagent. Keep the command and source artifact with the result.
+
+9. **Allow "no difference" in the hypothesis.** State before dispatch what evidence would show that a treatment adds nothing. An expensive arm is not evidence of a useful arm.
+
+10. **Check the question is still open.** Confirm the target behavior and revision before starting a probe. An already-fixed issue or merged branch is not a live experiment target.
+
+11. **Reuse a baseline only when it is comparable.** A stored run can serve as a control if the target, environment, and measurement contract match. Record those revisions; rerun the baseline when they do not.
+
+12. **Track what changed during a run.** A change to the subject under test invalidates the comparison. A moving base may also matter; check whether it changes the code, environment, or outcome being compared before discarding or retaining the run.
+
 ## Anti-patterns
 
 Observations from probe audits. Each names a failure mode an auditor can spot in a real folder.
@@ -83,6 +95,12 @@ Observations from probe audits. Each names a failure mode an auditor can spot in
 - **Debugging stuffed into `experiments/`.** The README's question is "why is the layout broken?" instead of "does technique X catch layout breaks within Y wall-clock?". This is a debugging session, not an experiment.
 
 - **Mid-experiment eval-pack edits.** `git log -- experiments/<slug>/eval-pack.md` shows edits after the first `runs/` file. The frozen-spec rule was violated.
+
+- **Treatment without a trace.** The verdict compares conditions, but the treatment has no corresponding event, file, or persisted value. The folder cannot establish that the arms differed.
+
+- **Unverified arithmetic.** A result quotes a count from an agent summary without the query and source artifact needed to reproduce it.
+
+- **Correlation without a possible mechanism.** A verdict assigns a cause from matching outcomes without checking that the proposed mechanism ran. Negative cases and mechanism traces can disprove the explanation.
 
 - **Tool churn rotting principles.** Removing a specific command (say, an RTK invocation) breaks half the skill body because tool guidance was woven through the structural sections. Dated `## Recommended tools and practices` exists to prevent exactly this.
 
