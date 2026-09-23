@@ -1,9 +1,0 @@
-{
-  "name": "delegation",
-  "description": "Cross-agent delegation and durable handoffs",
-  "skills": [
-    "delegation/delegating-to-claude-p",
-    "delegation/delegating-to-codex",
-    "delegation/writing-handoffs"
-  ]
-}

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 280" role="img" aria-labelledby="title desc">
+  <title id="title">Agentic Skills</title>
+  <desc id="desc">Portable agent skills in six collections, installable with Vercel Skills.</desc>
+  <defs>
+    <linearGradient id="bg" x2="1" y2="1">
+      <stop stop-color="#0b1220"/>
+      <stop offset="1" stop-color="#111b2e"/>
+    </linearGradient>
+    <linearGradient id="accent" x2="1" y2="0">
+      <stop stop-color="#6ee7f9"/>
+      <stop offset="1" stop-color="#a78bfa"/>
+    </linearGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#28405f" stroke-opacity=".28"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="280" rx="22" fill="url(#bg)"/>
+  <rect width="1200" height="280" rx="22" fill="url(#grid)"/>
+  <rect x="38" y="36" width="8" height="72" rx="4" fill="url(#accent)"/>
+  <text x="68" y="77" fill="#f5f8ff" font-family="Arial, Helvetica, sans-serif" font-size="42" font-weight="700">Agentic Skills</text>
+  <text x="69" y="111" fill="#a9b9d0" font-family="Arial, Helvetica, sans-serif" font-size="19">Portable skills for the agents you already use</text>
+  <path d="M70 156H1130" stroke="#344862" stroke-width="1"/>
+  <g font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
+    <g fill="#16283d" stroke="#42758a"><rect x="68" y="186" width="160" height="52" rx="12"/><text x="148" y="219" fill="#d8faff" stroke="none">SDLC</text></g>
+    <g fill="#1b2540" stroke="#7064a6"><rect x="248" y="186" width="160" height="52" rx="12"/><text x="328" y="219" fill="#efe6ff" stroke="none">Delegation</text></g>
+    <g fill="#16283d" stroke="#42758a"><rect x="428" y="186" width="160" height="52" rx="12"/><text x="508" y="219" fill="#d8faff" stroke="none">Docs</text></g>
+    <g fill="#1b2540" stroke="#7064a6"><rect x="608" y="186" width="160" height="52" rx="12"/><text x="688" y="219" fill="#efe6ff" stroke="none">Meta</text></g>
+    <g fill="#16283d" stroke="#42758a"><rect x="788" y="186" width="160" height="52" rx="12"/><text x="868" y="219" fill="#d8faff" stroke="none">Experiments</text></g>
+    <g fill="#1b2540" stroke="#7064a6"><rect x="968" y="186" width="164" height="52" rx="12"/><text x="1050" y="219" fill="#efe6ff" stroke="none">Observability</text></g>
+  </g>
+</svg>
