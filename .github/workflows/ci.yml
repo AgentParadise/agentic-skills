@@ -28,6 +28,21 @@ jobs:
       - run: cargo test --workspace
       - run: cargo run --quiet -p agentic-skills -- validate
       - run: npx -y skills@1.7.0 add . --list
+      - name: Smoke-test module installation across harnesses
+        run: |
+          cargo build --quiet -p agentic-skills
+          consumer="$(mktemp -d)"
+          cd "$consumer"
+          "$GITHUB_WORKSPACE/target/debug/agentic-skills" install delegation \
+            --source "$GITHUB_WORKSPACE" \
+            --agent claude-code \
+            --agent codex \
+            --agent gemini-cli \
+            --copy
+          test -f .agents/skills/delegating-to-claude-p/SKILL.md
+          test -f .agents/skills/delegating-to-codex/SKILL.md
+          test -f .agents/skills/writing-handoffs/SKILL.md
+          test -f .claude/skills/delegating-to-codex/SKILL.md
 
   test:
     strategy:
