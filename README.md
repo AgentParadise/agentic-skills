@@ -72,7 +72,3 @@ skills/<module>/<skill>/references/    # optional
 ```
 
 The skills came from Agentic Primitives. Workspace runtime and exporter tooling live in [Agentic Workspace](https://github.com/AgentParadise/agentic-workspace). See [AGENTS.md](AGENTS.md) for authoring rules. MIT licensed.
-
-## Language breakdown
-
-This is a Markdown-first skill catalog, not an HTML application. The HTML files are real templates bundled with documentation skills. GitHub normally excludes Markdown from its language chart, so this repository explicitly includes its Markdown source there. The prior Rust collection installer was removed in favor of Vercel Skills.
