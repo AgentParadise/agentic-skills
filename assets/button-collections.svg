@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="162" height="36" viewBox="0 0 162 36" role="img" aria-labelledby="title">
+  <title id="title">Browse collections</title>
+  <rect x=".5" y=".5" width="161" height="35" rx="8" fill="#17343D" stroke="#6AB8C3"/>
+  <g fill="#72DAB9"><circle cx="15" cy="15" r="2.5"/><circle cx="22" cy="15" r="2.5"/><circle cx="15" cy="22" r="2.5"/><circle cx="22" cy="22" r="2.5"/></g>
+  <text x="36" y="23" fill="#F4F8F7" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700">Browse collections</text>
+</svg>

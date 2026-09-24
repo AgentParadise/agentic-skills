@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="36" viewBox="0 0 160 36" role="img" aria-labelledby="title">
+  <title id="title">Install for Claude Code</title>
+  <rect x=".5" y=".5" width="159" height="35" rx="8" fill="#17343D" stroke="#6AB8C3"/>
+  <circle cx="18" cy="18" r="5" fill="#72DAB9"/>
+  <text x="32" y="23" fill="#F4F8F7" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700">Install for Claude</text>
+</svg>

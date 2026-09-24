@@ -1,5 +1,4 @@
-<p align="center"><img src="assets/agent-paradise.png" alt="Agent Paradise palm-tree mark" width="72"></p>
-<p align="center"><img src="assets/banner.svg" alt="Agentic Skills by Agent Paradise" width="960"></p>
+<p align="center"><img src="assets/banner.png" alt="Agentic Skills by Agent Paradise, with the circuit-palm mark" width="960"></p>
 
 # Agentic Skills
 
@@ -9,7 +8,11 @@
 
 Portable skills for Claude Code, Codex, Gemini CLI, and other agents supported by [Vercel Skills](https://github.com/vercel-labs/skills). Install one skill, a whole module, or choose from the full catalog. No build required.
 
-[Claude Code](#claude-code) · [Codex](#codex) · [Collections](#collections)
+<p align="center">
+  <a href="#claude-code"><img src="assets/button-claude.svg" alt="Install for Claude Code" width="160" height="36"></a>
+  <a href="#codex"><img src="assets/button-codex.svg" alt="Install for Codex" width="150" height="36"></a>
+  <a href="#collections"><img src="assets/button-collections.svg" alt="Browse collections" width="162" height="36"></a>
+</p>
 
 ## Install from GitHub
 
