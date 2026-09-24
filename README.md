@@ -1,10 +1,15 @@
-![Agentic Skills banner](assets/banner.svg)
+<p align="center"><img src="assets/agent-paradise.png" alt="Agent Paradise palm-tree mark" width="72"></p>
+<p align="center"><img src="assets/banner.svg" alt="Agentic Skills by Agent Paradise" width="960"></p>
 
 # Agentic Skills
 
+[![CI](https://github.com/AgentParadise/agentic-skills/actions/workflows/ci.yml/badge.svg)](https://github.com/AgentParadise/agentic-skills/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-0D3F49.svg)](LICENSE)
+[![Docs](https://img.shields.io/badge/docs-quickstart-0D3F49.svg)](#install-from-github)
+
 Portable skills for Claude Code, Codex, Gemini CLI, and other agents supported by [Vercel Skills](https://github.com/vercel-labs/skills). Install one skill, a whole module, or choose from the full catalog. No build required.
 
-[![Install for Claude Code](assets/button-claude.svg)](#claude-code) [![Install for Codex](assets/button-codex.svg)](#codex) [![Browse collections](assets/button-collections.svg)](#collections)
+[Claude Code](#claude-code) · [Codex](#codex) · [Collections](#collections)
 
 ## Install from GitHub
 
@@ -64,3 +69,7 @@ skills/<module>/<skill>/references/    # optional
 ```
 
 The skills came from Agentic Primitives. Workspace runtime and exporter tooling live in [Agentic Workspace](https://github.com/AgentParadise/agentic-workspace). See [AGENTS.md](AGENTS.md) for authoring rules. MIT licensed.
+
+## Language breakdown
+
+This is a Markdown-first skill catalog, not an HTML application. The HTML files are real templates bundled with documentation skills. GitHub normally excludes Markdown from its language chart, so this repository explicitly includes its Markdown source there. The prior Rust collection installer was removed in favor of Vercel Skills.

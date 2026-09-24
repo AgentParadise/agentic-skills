@@ -1,31 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 280" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="230" viewBox="0 0 1200 230" role="img" aria-labelledby="title desc">
   <title id="title">Agentic Skills</title>
-  <desc id="desc">Portable agent skills in six collections, installable with Vercel Skills.</desc>
+  <desc id="desc">Agent Paradise banner for portable, modular agent skills.</desc>
   <defs>
-    <linearGradient id="bg" x2="1" y2="1">
-      <stop stop-color="#0b1220"/>
-      <stop offset="1" stop-color="#111b2e"/>
-    </linearGradient>
-    <linearGradient id="accent" x2="1" y2="0">
-      <stop stop-color="#6ee7f9"/>
-      <stop offset="1" stop-color="#a78bfa"/>
-    </linearGradient>
-    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
-      <path d="M32 0H0V32" fill="none" stroke="#28405f" stroke-opacity=".28"/>
-    </pattern>
+    <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#0B2025"/><stop offset="1" stop-color="#0D3F49"/></linearGradient>
+    <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse"><path d="M30 0H0V30" fill="none" stroke="#5DDEEF" stroke-opacity=".1"/></pattern>
   </defs>
-  <rect width="1200" height="280" rx="22" fill="url(#bg)"/>
-  <rect width="1200" height="280" rx="22" fill="url(#grid)"/>
-  <rect x="38" y="36" width="8" height="72" rx="4" fill="url(#accent)"/>
-  <text x="68" y="77" fill="#f5f8ff" font-family="Arial, Helvetica, sans-serif" font-size="42" font-weight="700">Agentic Skills</text>
-  <text x="69" y="111" fill="#a9b9d0" font-family="Arial, Helvetica, sans-serif" font-size="19">Portable skills for the agents you already use</text>
-  <path d="M70 156H1130" stroke="#344862" stroke-width="1"/>
-  <g font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle">
-    <g fill="#16283d" stroke="#42758a"><rect x="68" y="186" width="160" height="52" rx="12"/><text x="148" y="219" fill="#d8faff" stroke="none">SDLC</text></g>
-    <g fill="#1b2540" stroke="#7064a6"><rect x="248" y="186" width="160" height="52" rx="12"/><text x="328" y="219" fill="#efe6ff" stroke="none">Delegation</text></g>
-    <g fill="#16283d" stroke="#42758a"><rect x="428" y="186" width="160" height="52" rx="12"/><text x="508" y="219" fill="#d8faff" stroke="none">Docs</text></g>
-    <g fill="#1b2540" stroke="#7064a6"><rect x="608" y="186" width="160" height="52" rx="12"/><text x="688" y="219" fill="#efe6ff" stroke="none">Meta</text></g>
-    <g fill="#16283d" stroke="#42758a"><rect x="788" y="186" width="160" height="52" rx="12"/><text x="868" y="219" fill="#d8faff" stroke="none">Experiments</text></g>
-    <g fill="#1b2540" stroke="#7064a6"><rect x="968" y="186" width="164" height="52" rx="12"/><text x="1050" y="219" fill="#efe6ff" stroke="none">Observability</text></g>
+  <rect width="1200" height="230" rx="20" fill="url(#bg)"/>
+  <rect width="1200" height="230" rx="20" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1200" height="230" rx="20" fill="none" stroke="#337784" stroke-width="2"/>
+  <path d="M50 47H178" stroke="#5DDEEF" stroke-width="4" stroke-linecap="round"/>
+  <text x="50" y="80" fill="#72DAB9" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="700" letter-spacing="3">AGENT PARADISE</text>
+  <text x="50" y="140" fill="#F4F8F7" font-family="Arial, Helvetica, sans-serif" font-size="52" font-weight="700">Agentic Skills</text>
+  <text x="52" y="178" fill="#B7D2D4" font-family="Arial, Helvetica, sans-serif" font-size="20">Portable skills. Pick one or install a collection.</text>
+  <g fill="none" stroke="#5DDEEF" stroke-width="3" opacity=".7">
+    <circle cx="1050" cy="114" r="73"/><circle cx="1050" cy="114" r="48"/>
+    <path d="M908 114h69m146 0h35M1050 13v28m0 146v30"/>
   </g>
+  <g fill="#72DAB9"><circle cx="908" cy="114" r="6"/><circle cx="1158" cy="114" r="6"/><circle cx="1050" cy="13" r="6"/><circle cx="1050" cy="217" r="6"/></g>
 </svg>

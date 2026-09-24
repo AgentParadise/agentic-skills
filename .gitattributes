@@ -1,0 +1,2 @@
+# Skills are the product, not incidental prose. Include Markdown in Linguist stats.
+*.md linguist-detectable -linguist-documentation
