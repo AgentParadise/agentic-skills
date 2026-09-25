@@ -246,7 +246,7 @@ After promotion, the proposal stays as a **captured-context record** with a link
 
 ## Cross-references
 
-- **Skill authoring chassis:** `../../../../../AgentParadise/harness-engineering/skills/authoring-skills/SKILL.md` -- the contract this skill itself was written against. Read it before refactoring this file.
+- **Skill authoring chassis:** `../../meta/authoring-skills/SKILL.md` -- the contract this skill itself was written against. Read it before refactoring this file.
 - **Repo conventions:** `docs/AGENTS.md` for the agent runbook; `docs/evolution/` for the current synthesis; `docs/retrospectives/` for prior lessons; `experiments/_template/` for the scaffold.
 
 ## Parallel via worktrees (added 2026-05-14 from EXP-25)

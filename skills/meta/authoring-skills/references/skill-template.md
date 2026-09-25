@@ -195,7 +195,7 @@ Example:
 
 ```
 File drift, gaps, or proposed updates at
-https://github.com/AgentParadise/harness-engineering/issues
+https://github.com/AgentParadise/agentic-skills/issues
 ```
 
 Length budget: one to three lines.

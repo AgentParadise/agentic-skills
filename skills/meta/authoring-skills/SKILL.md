@@ -145,6 +145,6 @@ The structural recommendations are tool-independent. The drafting and review loo
 ## Continual improvement
 
 This skill is maintained at:
-https://github.com/AgentParadise/harness-engineering/blob/main/skills/authoring-skills/SKILL.md
+https://github.com/AgentParadise/agentic-skills/blob/main/skills/meta/authoring-skills/SKILL.md
 
 Improvements to the chassis must be applied to this file first, then propagated to every other skill in the plugin via a sweep. Chassis drift is the most expensive kind of drift; do not let it land without the sweep.

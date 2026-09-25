@@ -1,0 +1,4 @@
+# Every path needs maintainer review. This repo publishes skills that agents
+# load and execute, so an unreviewed change to a SKILL.md is an unreviewed
+# change to agent behaviour.
+*   @NeuralEmpowerment

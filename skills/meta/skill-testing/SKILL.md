@@ -169,6 +169,6 @@ If any step fails, the change is not ready. Fix and re-run.
 ## Continual improvement
 
 This skill is maintained at:
-https://github.com/AgentParadise/harness-engineering/blob/main/skills/skill-testing/SKILL.md
+https://github.com/AgentParadise/agentic-skills/blob/main/skills/meta/skill-testing/SKILL.md
 
 Test methodology refinements (new flake patterns, cheaper test orchestration, CI integration recipes) belong in this file and its references. The empirical study that produced this skill is at `docs/superpowers/specs/2026-05-14-routing-test-results.md`.
