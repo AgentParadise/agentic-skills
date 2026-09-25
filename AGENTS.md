@@ -23,3 +23,5 @@ This repo is a catalog of agent skills. [Vercel Skills](https://github.com/verce
 Run `npx skills add . --list` for catalog discovery and `npx skills add ./skills/<module> --list` for one module. CI also installs a module into Claude Code, Codex, and Gemini CLI destinations.
 
 Write harness-neutral instructions where possible. State any harness requirement inside the skill. Do not use em dashes.
+
+- Never commit absolute home paths or real infrastructure hostnames. See [docs/PII-HYGIENE.md](docs/PII-HYGIENE.md).
