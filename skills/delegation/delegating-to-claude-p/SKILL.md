@@ -1,7 +1,7 @@
 ---
 name: delegating-to-claude-p
 description: Use when authoring a non-interactive `claude -p` invocation or designing a delegation prompt for autonomous Claude on the consumer side. Provides the empirically-validated flag set, prompt template, steers-vs-needs-naming map, failure-mode catalog, recipe templates, and cost reference distilled from 22 sub-experiments (S1 → S22) in the agentic-harness-lab v0.8.0 dogfood arc. Trigger phrases include "delegate to claude -p", "claude -p flags", "autonomous claude", "one-shot claude", "claude -p prompt", "headless claude". Do NOT use for interactive Claude Code sessions, brainstorming, or genuine multi-turn work - `claude -p` is a one-shot contract; pick interactive Claude for those.
-placement: "Domain skill. Lives at `plugins/delegation/skills/delegating-to-claude-p/` in agentic-primitives. NOT in `.claude/skills/`; that scope is for meta skills."
+placement: "Domain skill. Lives at `skills/delegation/delegating-to-claude-p/` in agentic-skills; install with `npx skills add AgentParadise/agentic-skills --skill delegating-to-claude-p`. NOT a meta skill."
 ---
 
 # Delegating to `claude -p`
@@ -11,6 +11,37 @@ placement: "Domain skill. Lives at `plugins/delegation/skills/delegating-to-clau
 Invoke this skill any time you are about to write a `claude -p` invocation or design a delegation prompt for autonomous Claude on the consumer side. It captures the empirically-validated flag set + prompt template from paired trials S6 → S16 of the agentic-harness-lab v0.8.0 dogfood arc, plus the failure modes that surfaced across S1 → S22. Source evidence: `docs/retrospectives/023-harness-dogfood-claude-p-steering.md` in `agentic-harness-lab`.
 
 The single guiding finding: **hard gates and explicit prompt verbs are what steer `claude -p`. Soft documentation (CLAUDE.md content, skill indices, advisory rules) is largely inert in non-interactive mode unless the user prompt names it explicitly.**
+
+## Captured workflow delegation
+
+This section applies only inside an Agentic Workspace (for example a
+Syntropic137 workflow workspace) whose session-store capability installs the
+`syn-delegate` shim and sets `AGENTIC_SESSION_STORE_PROVIDER=local`. Check with
+`command -v syn-delegate`. Outside such a workspace the shim does not exist:
+skip to the raw `claude -p` recipes below.
+
+When `AGENTIC_SESSION_STORE_PROVIDER=local`, use the installed structured shim:
+
+```sh
+syn-delegate claude --prompt="$TASK_PROMPT" --timeout 600
+```
+
+Keep the `=` in `--prompt="$TASK_PROMPT"`: a prompt that starts with `-` is
+otherwise read as an option and the shim exits 2 without launching. The shim
+passes the prompt to the harness after `--`, so it can never become a CLI flag.
+`--sandbox` is Codex-only; the shim rejects it for `claude`.
+
+Use `--model` when selecting a model explicitly. Run from the intended working
+directory. Existing harness configuration controls permissions; the shim does
+not grant permissions. It records intent before launch, binds the delegate's own
+native session ID, and preserves its actual exit status even when a caller uses
+`|| true` or a pipeline. Claude's shell hook supplies exact parent context;
+Codex supplies its native `CODEX_THREAD_ID`. Missing parent context or durable
+storage denies launch. Do not fabricate these context values or fall back to a
+raw CLI to bypass a capture failure.
+
+The raw CLI examples below describe uncaptured use and underlying harness
+options. In captured workflows, use the shim so the run can discover this launch.
 
 ## The validated invocation
 

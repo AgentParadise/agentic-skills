@@ -1,7 +1,7 @@
 ---
 name: writing-handoffs
 description: Use when you need to compact the current conversation into a handoff document so a fresh session or agent can continue a branch or task with full context. Trigger phrases include "write a handoff", "hand this off", "compact this for a fresh agent", "handoff doc", "summarize this branch's context", "I'll pick this up later", "create a handoff for the next session". Produces a structured Markdown doc (from a template) capturing purpose, current state, files affected, rationale, do's-and-don'ts learned, and suggested skills. Do NOT use to author PRDs, ADRs, plans, or specs — those are separate durable artifacts that a handoff references by path, not reproduces. Do NOT use for a routine end-of-task summary message; a handoff is a written file for a different session to load.
-placement: "Domain skill. Lives at `plugins/delegation/skills/writing-handoffs/` in agentic-primitives. NOT in `.claude/skills/`; that scope is for meta skills."
+placement: "Domain skill. Lives at `skills/delegation/writing-handoffs/` in agentic-skills; install with `npx skills add AgentParadise/agentic-skills --skill writing-handoffs`. NOT a meta skill."
 ---
 
 # Writing Handoffs
