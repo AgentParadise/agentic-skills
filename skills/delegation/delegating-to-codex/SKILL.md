@@ -1,7 +1,7 @@
 ---
 name: delegating-to-codex
 description: Use when authoring a non-interactive `codex exec` invocation or deciding whether to hand a task from Claude Code to OpenAI Codex CLI. Provides the validated autonomous invocation, the sandbox/approval ladder, the JSON event schema for triage, a when-to-delegate framework, failure modes, and one empirical trial. Trigger phrases include "delegate to codex", "codex exec", "hand this to codex", "run codex", "codex --full-auto", "ask codex", "second opinion from codex", "have codex use a skill", "run a skill in codex", "codex pr-review". Do NOT use for interactive pair-programming in the Codex TUI, or for trivial CRUD/UI/first-attempt tasks where a model handoff adds no value. For autonomous Claude (not Codex), use `delegating-to-claude-p` instead.
-placement: "Domain skill. Lives at `plugins/delegation/skills/delegating-to-codex/` in agentic-primitives. NOT in `.claude/skills/`; that scope is for meta skills."
+placement: "Domain skill. Lives at `skills/delegation/delegating-to-codex/` in agentic-skills; install with `npx skills add AgentParadise/agentic-skills --skill delegating-to-codex`. NOT a meta skill."
 ---
 
 # Delegating to `codex exec`
@@ -125,7 +125,9 @@ Pick the least privilege that lets the task finish. Granularity Codex exposes:
 Nothing above `workspace-write` is on the ladder. Modes and flags that switch
 Codex's sandbox off are not used by these recipes, and `syn-delegate` refuses
 them (`--sandbox` accepts only `read-only` and `workspace-write`). When writes
-must reach a directory outside the workspace, add `--add-dir <dir>` instead.
+must reach a directory outside the workspace, pass `--add-dir <dir>` to a raw
+`codex exec` instead. `syn-delegate` has no `--add-dir` option; under the shim,
+run from a working directory that already contains every path Codex must write.
 
 ### Inside a workspace container: keep the sandbox, fix the container
 
@@ -158,13 +160,29 @@ while `--cap-drop=ALL`, `no-new-privileges` and the read-only root stay in
 force. On AppArmor hosts (Ubuntu 24.04, where the symptom is
 `bwrap: Failed to make / slave: Permission denied`) it also applies the
 AppArmor profile `agentic-codex-sandbox`, which the host administrator loads
-once with `sudo apparmor_parser -r`; it admits only the mounts bubblewrap
+on the Docker host (see "Loading the AppArmor profile" below); it admits only the mounts bubblewrap
 performs, so Codex must run from a directory under `/workspace`. With both,
 `-s workspace-write` works as designed: writes inside the workspace succeed
 and writes outside it are denied. For any other container, grant the same
 thing yourself: a seccomp profile that admits those syscalls (and, on AppArmor
 hosts, an AppArmor profile that admits bubblewrap's mounts). Do not swap the
 sandbox for a bypass flag.
+
+#### Loading the AppArmor profile
+
+The profile ships in the `agentic-isolation` Python package at
+`agentic_isolation/apparmor/agentic-codex-sandbox`. Locate and load it on the
+host that runs the Docker daemon, using the Python environment where
+`agentic-isolation` is installed:
+
+```sh
+PROFILE="$(python3 -c 'from agentic_isolation import codex_sandbox_apparmor_profile_path as p; print(p())')"
+sudo apparmor_parser -r "$PROFILE"
+```
+
+`apparmor_parser -r` lasts until reboot. To load it at every boot, copy it to
+`/etc/apparmor.d/agentic-codex-sandbox` (`sudo cp "$PROFILE" /etc/apparmor.d/`)
+and load it from there.
 
 Without the shim, run the same probe yourself before trusting a run:
 `codex sandbox -c 'sandbox_mode="workspace-write"' -- true` must exit 0.
@@ -300,9 +318,9 @@ the format section is what steers the output. See Trial T2.
 | `--base <BRANCH> cannot be used with [PROMPT]` | `codex exec review` takes its built-in rubric OR custom instructions, not both | Pick one: `review --base` for the stock rubric, or plain `codex exec` with your own prompt |
 | Cannot write files / run commands | Default sandbox is `read-only` | Set `-s workspace-write` explicitly |
 | Refuses to run | Not inside a git repo | Add `--skip-git-repo-check` |
-| Writes need a dir outside the workspace | `workspace-write` is workspace-scoped | Add `--add-dir <dir>`; keep the sandbox mode as it is |
+| Writes need a dir outside the workspace | `workspace-write` is workspace-scoped | Raw `codex exec`: add `--add-dir <dir>`, keep the sandbox mode. `syn-delegate` has no `--add-dir`; run from a directory covering the paths |
 | `bwrap: No permissions to create a new namespace`, every write fails, exit 0 | Workspace runs Docker's default seccomp profile | Agentic Workspace: use an image labelled `agentic.codex_cli_version` through `agentic_isolation`, which applies the Codex sandbox policy. Other containers: add a seccomp profile admitting the namespace syscalls |
-| `bwrap: Failed to make / slave: Permission denied` | AppArmor host, workspace confined by `docker-default` | Load `agentic-codex-sandbox` on the host (`sudo apparmor_parser -r`) |
+| `bwrap: Failed to make / slave: Permission denied` | AppArmor host, workspace confined by `docker-default` | Load `agentic-codex-sandbox` on the host: `sudo apparmor_parser -r "$PROFILE"` (see "Loading the AppArmor profile"); copy to `/etc/apparmor.d/` to persist |
 | `bwrap: Can't bind mount ... Permission denied` | Codex started outside `/workspace` on an AppArmor host | Run from a directory under `/workspace` |
 | `syn-delegate` exits 69, `launch_failed` / `codex_sandbox_unavailable` | The live probe found the Codex sandbox unusable | Same fixes; the stderr line names the bwrap cause |
 | `syn-delegate` exits 2, `--prompt: expected one argument` | Prompt starts with `-` | Use `--prompt="$TASK_PROMPT"` |
