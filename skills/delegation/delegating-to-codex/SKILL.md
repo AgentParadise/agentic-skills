@@ -396,8 +396,9 @@ deliberately left unimplemented, so a correct review must flag the omission.
   `BLOCKERS FOUND`) were present in A and absent in B.
 
 Takeaway: injecting a skill and naming it in the prompt **does** steer Codex's
-output format and process — but the content must be supplied, since Codex won't
-auto-dispatch it. Finding *fidelity* was similar in both runs because the bug was
+output format and process. In this trial the skill was not installed under a
+Codex skill root, so the content had to be supplied; a skill installed with
+`-a codex` is listed to Codex instead. Finding *fidelity* was similar in both runs because the bug was
 obvious; skills earn their keep on **structure and process discipline**, which is
 exactly what a pr-review skill enforces.
 
