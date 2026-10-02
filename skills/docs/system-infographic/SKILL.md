@@ -83,4 +83,4 @@ Signals: a full-page screenshot was rendered and inspected; the layout holds at 
 
 ## Continual improvement
 
-File drift, gaps, or proposed updates at https://github.com/AgentParadise/agentic-primitives/issues
+File drift, gaps, or proposed updates at https://github.com/AgentParadise/agentic-skills/issues

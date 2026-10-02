@@ -3,6 +3,7 @@ name: CI
 on:
   push:
     branches: [main]
+    tags: ['v*']
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -27,21 +28,14 @@ jobs:
           for module in skills/*; do
             npx -y skills@1.7.0 add "./$module" --list
           done
-      - name: Smoke-test module installation across harnesses
-        shell: bash
-        run: |
-          consumer="$(mktemp -d)"
-          cd "$consumer"
-          npx -y skills@1.7.0 add "$GITHUB_WORKSPACE/skills/delegation" \
-            --skill '*' \
-            -a claude-code \
-            -a codex \
-            -a gemini-cli \
-            --copy -y
-          test -f .agents/skills/delegating-to-claude-p/SKILL.md
-          test -f .agents/skills/delegating-to-codex/SKILL.md
-          test -f .agents/skills/writing-handoffs/SKILL.md
-          test -f .claude/skills/delegating-to-codex/SKILL.md
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - name: Install every module into Claude Code and Codex and diff against source
+        run: scripts/verify-install.sh
+      - name: Prove the published tag installs the same content
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          TAG_URL: https://github.com/${{ github.repository }}/tree/${{ github.ref_name }}
+        run: scripts/verify-install.sh "$TAG_URL"
 
   required:
     name: Required CI
