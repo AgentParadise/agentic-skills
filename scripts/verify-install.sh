@@ -65,8 +65,10 @@ for module_dir in "$repo"/skills/*/; do
       codex) dest="$consumer/.agents/skills" ;;
     esac
     result=ok
-    installed="$( [ -d "$dest" ] && (cd "$dest" && find . -mindepth 2 -maxdepth 2 -name SKILL.md \
-      | sed 's#^\./##; s#/SKILL.md$##' | LC_ALL=C sort) )"
+    # Every entry under the destination, not only dirs holding SKILL.md, so a
+    # stray or half-installed skill fails the set comparison.
+    installed="$( [ -d "$dest" ] && (cd "$dest" && find . -mindepth 1 -maxdepth 1 \
+      | sed 's#^\./##' | LC_ALL=C sort) )"
     if [ "$installed" != "$expected" ]; then
       echo "     $module/$harness installed set differs:"
       diff <(printf '%s\n' "$expected") <(printf '%s\n' "$installed") || true
@@ -75,6 +77,10 @@ for module_dir in "$repo"/skills/*/; do
     while IFS= read -r skill; do
       [ -n "$skill" ] || continue
       [ -d "$dest/$skill" ] || continue
+      if [ ! -f "$dest/$skill/SKILL.md" ]; then
+        echo "     $module/$harness/$skill has no SKILL.md"
+        result=FAIL
+      fi
       if ! diff -r "$module_dir$skill" "$dest/$skill" >/dev/null; then
         echo "     $module/$harness/$skill content differs from source"
         diff -r "$module_dir$skill" "$dest/$skill" | head -10 || true

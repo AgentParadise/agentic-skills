@@ -304,9 +304,13 @@ different model's reasoning.
 
 ## Using a Claude skill (e.g. pr-review) with Codex
 
-Codex does **not** auto-dispatch Claude `SKILL.md` plugin skills — it consults no
-skills index. To make Codex follow a specific skill, **inject the skill's content
-and name it in the prompt.** Two mechanisms:
+Codex lists only skills under its own roots: `.agents/skills/` in the
+repository and `~/.codex/skills/` (measured with codex-cli 0.155.1 via
+`codex debug prompt-input`). It never reads Claude plugin skills or
+`.claude/skills/`. If the skill is in this catalog, install it for Codex
+(`npx skills add AgentParadise/agentic-skills --skill review -a codex`) and
+Codex can load it by name. For a skill that exists only on the Claude side,
+**inject the skill's content and name it in the prompt.** Two mechanisms:
 
 - **stdin (best for one-shot)** — pipe the skill body in; Codex appends it as a
   `<stdin>` block. This is the one case where you do NOT redirect from

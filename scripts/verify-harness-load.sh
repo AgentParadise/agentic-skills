@@ -30,9 +30,11 @@ expected="$(find "$repo/skills" -mindepth 3 -maxdepth 3 -name SKILL.md \
 (cd "$project" && npx -y "$SKILLS_CLI" add "$source_root" --skill '*' \
   -a claude-code -a codex --copy -y >"$work/install.log" 2>&1)
 
-claude_loaded="$(cd "$project" && claude -p --model haiku --output-format stream-json \
+(cd "$project" && claude -p --model haiku --output-format stream-json \
   --verbose --setting-sources project --max-turns 1 "Reply with the single word ok." \
-  </dev/null 2>/dev/null | head -1 | jq -r '.skills[]' | LC_ALL=C sort)"
+  </dev/null >"$work/claude.jsonl" 2>"$work/claude.err")
+claude_loaded="$(jq -r 'select(.type == "system" and .subtype == "init") | .skills[]' \
+  "$work/claude.jsonl" | LC_ALL=C sort -u)"
 
 codex_root="$(cd "$project/.agents/skills" && pwd -P)"
 codex_prompt="$(cd "$project" && command codex debug prompt-input "ok" </dev/null 2>/dev/null)"
