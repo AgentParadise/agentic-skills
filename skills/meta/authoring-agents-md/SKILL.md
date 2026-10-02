@@ -1,7 +1,7 @@
 ---
 name: authoring-agents-md
 description: Use when authoring, reviewing, or setting up an `AGENTS.md` file (the open "README for agents" format) and wiring it to Claude Code, which reads `CLAUDE.md` not `AGENTS.md`. Trigger phrases include "write an AGENTS.md", "author agents.md", "create AGENTS.md", "set up AGENTS.md", "AGENTS.md best practices", "AGENTS.md vs CLAUDE.md", "symlink CLAUDE.md to AGENTS.md", "make AGENTS.md canonical", "how does Claude use CLAUDE.md", "nested AGENTS.md", "monorepo agent instructions", "agents.md spec", "agent instructions file". Covers the agents.md spec, the canonical AGENTS.md-source-of-truth + symlinked-CLAUDE.md setup, Claude Code's CLAUDE.md load order and `@import` rules, and monorepo nesting. Do NOT use for authoring a Claude skill (use `authoring-skills`), for general CLAUDE.md auto-memory/rules configuration beyond the AGENTS.md bridge (see Claude Code memory docs), or for slash commands and hooks.
-placement: "Meta-skill. Lives in `plugins/<meta-plugin>/skills/authoring-agents-md/` or repo-local `.claude/skills/authoring-agents-md/`. It teaches how to author an agent-instructions artifact, so it belongs at the meta level alongside `authoring-skills`, not among domain skills."
+placement: "Meta-skill. Lives at `skills/meta/authoring-agents-md/` in agentic-skills; install with `npx skills add AgentParadise/agentic-skills --skill authoring-agents-md`. It teaches how to author an agent-instructions artifact, so it belongs in the meta module alongside `authoring-skills`, not among domain skills."
 ---
 
 # Authoring AGENTS.md
@@ -86,4 +86,4 @@ Signals: the CLAUDE.md ↔ AGENTS.md link survives a fresh clone and works cross
 ## Continual improvement
 
 File drift, gaps, or proposed updates at
-https://github.com/AgentParadise/agentic-primitives/issues
+https://github.com/AgentParadise/agentic-skills/issues

@@ -44,7 +44,28 @@ npx skills add https://github.com/AgentParadise/agentic-skills/tree/main/skills/
 
 Replace `sdlc` with a collection below and `claude-code` with `codex`, `gemini-cli`, or another [supported agent](https://github.com/vercel-labs/skills#supported-agents). Add `-g` for installation across projects. Use `--list` to preview without installing.
 
-The repository is currently private, so you need Git, GitHub CLI, or SSH access to install from GitHub.
+The repository is public, so no GitHub credentials are needed to install.
+
+### Install per module
+
+Each command installs every skill in one module into both Claude Code (`.claude/skills/`) and Codex (`.agents/skills/`). Drop either `-a` flag to target one harness.
+
+| Module | Command |
+| --- | --- |
+| SDLC | `npx skills add https://github.com/AgentParadise/agentic-skills/tree/main/skills/sdlc --skill '*' -a claude-code -a codex -y` |
+| Delegation | `npx skills add https://github.com/AgentParadise/agentic-skills/tree/main/skills/delegation --skill '*' -a claude-code -a codex -y` |
+| Docs | `npx skills add https://github.com/AgentParadise/agentic-skills/tree/main/skills/docs --skill '*' -a claude-code -a codex -y` |
+| Meta | `npx skills add https://github.com/AgentParadise/agentic-skills/tree/main/skills/meta --skill '*' -a claude-code -a codex -y` |
+| Experiments | `npx skills add https://github.com/AgentParadise/agentic-skills/tree/main/skills/experiments --skill '*' -a claude-code -a codex -y` |
+| Observability | `npx skills add https://github.com/AgentParadise/agentic-skills/tree/main/skills/observability --skill '*' -a claude-code -a codex -y` |
+
+### Pin a release
+
+Releases are immutable. Replace `main` with a tag, for example `v0.2.0`, to install exactly what that release contains:
+
+```bash
+npx skills add https://github.com/AgentParadise/agentic-skills/tree/v0.2.0/skills/sdlc --skill '*' -a claude-code -a codex -y
+```
 
 ## Collections
 
@@ -71,4 +92,4 @@ skills/<module>/<skill>/scripts/       # optional
 skills/<module>/<skill>/references/    # optional
 ```
 
-The skills came from Agentic Primitives. Workspace runtime and exporter tooling live in [Agentic Workspace](https://github.com/AgentParadise/agentic-workspace). See [AGENTS.md](AGENTS.md) for authoring rules. MIT licensed.
+The skills came from Agentic Primitives, which is archived; this repo is now their home. Workspace runtime and exporter tooling live in [Agentic Workspace](https://github.com/AgentParadise/agentic-workspace). See [AGENTS.md](AGENTS.md) for authoring rules. MIT licensed.

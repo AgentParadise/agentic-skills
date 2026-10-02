@@ -108,4 +108,4 @@ Signals: it opens offline in a fresh browser with no build step; it renders corr
 
 ## Continual improvement
 
-File drift, gaps, or proposed updates at https://github.com/AgentParadise/agentic-primitives/issues
+File drift, gaps, or proposed updates at https://github.com/AgentParadise/agentic-skills/issues

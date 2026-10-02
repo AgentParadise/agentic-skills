@@ -20,7 +20,7 @@ This repo is a catalog of agent skills. [Vercel Skills](https://github.com/verce
 
 ## Validate
 
-Run `npx skills add . --list` for catalog discovery and `npx skills add ./skills/<module> --list` for one module. CI also installs a module into Claude Code, Codex, and Gemini CLI destinations.
+Run `npx skills add . --list` for catalog discovery and `npx skills add ./skills/<module> --list` for one module. Run `scripts/verify-install.sh` (needs Node and uv) for the install proof CI runs: it installs every module into Claude Code and Codex, diffs each installed skill against its source, and parses its frontmatter. On a `v*` tag CI also runs it against the tag's GitHub URL. Pass a tree URL to prove a published ref from a checkout of that ref.
 
 Write harness-neutral instructions where possible. State any harness requirement inside the skill. Do not use em dashes.
 
