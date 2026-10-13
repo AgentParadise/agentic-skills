@@ -49,19 +49,19 @@ A workflow that frequently needs `attempt > 1` to pass is hiding a flake.
 
 Cheapest and safest first. Re-measure after each step.
 
-1. **Cancel superseded runs.** Add a concurrency group so a new push to a PR cancels the old run:
+1. **Cancel superseded runs.** Add a concurrency group so a new push to a PR cancels the old run, while every trunk and release commit gets its own group:
 
    ```yaml
    concurrency:
-     group: ${{ github.workflow }}-${{ github.ref }}
+     group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
    ```
 
-   Keeping it off for the trunk and release refs means every trunk commit still gets a complete record.
+   `cancel-in-progress: false` alone is not enough on trunk: a group holds one running and one pending run, so with A running and B pending, C replaces B and B never runs. Grouping non-PR runs by `github.run_id` gives each trunk commit a complete record.
 
 2. **Cache dependencies and build outputs.** Use the language setup action's built-in cache (`actions/setup-node` with `cache:`, `actions/setup-python` or `astral-sh/setup-uv` with caching, `Swatinem/rust-cache` for Cargo) or `actions/cache` keyed on the lockfile hash. Check the cache hit rate in the step log after the change; a key that includes something volatile never hits.
 
-3. **Skip work the change cannot affect.** `paths:` / `paths-ignore:` filters, or a `dorny/paths-filter` step that sets outputs for later jobs. The trap: a required status check in a workflow that a path filter skips leaves the PR waiting forever. Fix it with one always-running aggregate job that is the only required check:
+3. **Skip work the change cannot affect.** The trap: a required status check in a workflow that a workflow-level `paths:` / `paths-ignore:` filter skips leaves the PR waiting forever, because a skipped workflow schedules no jobs at all, an `if: always()` job included. So keep the workflow that carries required checks unfiltered: detect changes inside it (a `dorny/paths-filter` step, or `git diff --name-only`, exposed as job outputs), skip expensive jobs with job-level `if:` conditions, and make one always-running aggregate job the only required check:
 
    ```yaml
    required:

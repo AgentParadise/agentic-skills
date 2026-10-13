@@ -98,13 +98,19 @@ metrics="$(jq -n \
   --argjson hotfix "$hotfix_hours" --argjson pre "$prereleases" '
   def ts: fromdateiso8601;
   def h: . / 3600;
-  def q(p): sort | if length == 0 then null else .[((length - 1) * p) | floor] end;
+  # Median: mean of the two middle values for an even count. Other percentiles:
+  # nearest rank, index ceil(n * p) - 1, so p90 of five samples is the largest.
+  def med: sort | length as $n | if $n == 0 then null
+      elif $n % 2 == 1 then .[($n - 1) / 2]
+      else (.[$n / 2 - 1] + .[$n / 2]) / 2 end;
+  def q(p): sort | length as $n | if $n == 0 then null
+      else .[([((($n * p) | ceil) - 1), 0] | max)] end;
   def ver: (ltrimstr("v")
       | capture("^(?<ma>[0-9]+)\\.(?<mi>[0-9]+)\\.(?<pa>[0-9]+)")
       | map_values(tonumber)) // null;
   def patch_of($prev): ver as $b | ($prev | ver) as $a
       | $a != null and $b != null and $a.ma == $b.ma and $a.mi == $b.mi and $b.pa > $a.pa;
-  def summary: {median_hours: (map(h) | q(0.5)), p90_hours: (map(h) | q(0.9)), n: length};
+  def summary: {median_hours: (map(h) | med), p90_hours: (map(h) | q(0.9)), n: length};
 
   ($now - $days * 86400) as $since
   | def inwin: . >= $since and . <= $now;
@@ -112,6 +118,9 @@ metrics="$(jq -n \
   ($rels[0]
     | map(select((.isDraft | not) and .publishedAt != null and ($pre or (.isPrerelease | not))))
     | map(. + {t: (.publishedAt | ts)})
+    # Nothing after --now exists yet: a historical report must not match a PR
+    # or a recovery against a release published later.
+    | map(select(.t <= $now))
     | sort_by(.t)) as $all_rels
   | ($all_rels | map(select(.t | inwin))) as $win_rels
 

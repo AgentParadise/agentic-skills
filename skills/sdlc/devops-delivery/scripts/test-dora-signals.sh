@@ -30,7 +30,8 @@ json="$("$script" --fixtures "$data" --now "$now" --base main --include-prerelea
 get() { printf '%s' "$json" | jq -c "$1"; }
 check "base filter drops the release-branch PR" "$(get .merged_prs)" "4"
 check "prerelease counted as a deployment" "$(get .releases)" "4"
-check "lead time median, first commit to merge" "$(get .lead_time.first_commit_to_merge.median_hours)" "3"
+check "lead time median, first commit to merge (even n averages)" "$(get .lead_time.first_commit_to_merge.median_hours)" "4.5"
+check "p90 is nearest rank, keeps the slowest sample" "$(get .lead_time.first_commit_to_merge.p90_hours)" "24"
 check "PR with no commits falls back to createdAt" "$(get .lead_time.first_commit_to_merge.n)" "4"
 check "revert counted, hotfix on other base excluded" "$(get .change_fail.revert_or_hotfix_prs)" "1"
 check "rc patch within window marks v1.3.0 failed" "$(get '[.time_to_restore.pairs[].failed]')" '["v1.2.0","v1.3.0"]'
@@ -39,6 +40,14 @@ check "draft release ignored" "$(get '[.time_to_restore.pairs[].fix] | index("v1
 # 3. A window with no activity yields n/a, not a division error.
 empty="$("$script" --fixtures "$data" --now 2026-12-31T00:00:00Z --days 7 --json)"
 check "empty window has null ratios" "$(printf '%s' "$empty" | jq -c '[.change_fail.fix_ratio, .lead_time.pr_open_to_merge.median_hours]')" "[null,null]"
+
+# 3b. Historical reports ignore releases published after --now.
+early="$("$script" --fixtures "$data" --now 2026-10-03T00:00:00Z --json)"
+check "later patch release is not a recovery yet" "$(printf '%s' "$early" | jq -c '[.change_fail.release_fail_ratio, .time_to_restore.n]')" "[0,0]"
+mid="$("$script" --fixtures "$data" --now 2026-10-06T00:00:00Z --json)"
+check "PR not matched to a release published after --now" "$(printf '%s' "$mid" | jq -c '[.lead_time.unreleased_prs, .lead_time.first_commit_to_release.n]')" "[1,2]"
+two="$("$script" --fixtures "$data" --now 2026-10-04T00:00:00Z --base main --json)"
+check "two-sample median is the mean, p90 the larger" "$(printf '%s' "$two" | jq -c '[.lead_time.first_commit_to_merge.median_hours, .lead_time.first_commit_to_merge.p90_hours]')" "[4.5,6]"
 
 # 4. Bad arguments exit non-zero.
 if "$script" --days seven --fixtures "$data" >/dev/null 2>&1; then
