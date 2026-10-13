@@ -31,7 +31,7 @@ Window: trailing `--days` (default 28) ending at `--now` (default the current ti
 | Change fail rate | releases followed by a quick patch | release R counts as failed when the next release is a patch bump of R (same major and minor, higher patch, semver tags with optional `v`) within `--hotfix-hours` (default 72) | Scheduled patch releases look like failures; failures fixed in a minor release look like successes. |
 | Time to restore | failed release to patch release | publish gap for each failed/patch pair above | Measures release-to-release, not detection-to-recovery. A failure noticed late reads as a long restore. |
 
-The median is the conventional one (the mean of the two middle values for an even count). p90 is nearest rank, index `ceil(n * 0.9) - 1`, so with ten or fewer samples it is the slowest one. Releases published after `--now` are ignored, so a historical report never uses a later release. Small `n` is printed next to every lead-time row so a reader can discount it.
+The median is the conventional one (the mean of the two middle values for an even count). p90 is nearest rank, index `ceil(n * 0.9) - 1`, so with nine or fewer samples it is the slowest one. Releases published after `--now` are ignored, so a historical report never uses a later release. Small `n` is printed next to every lead-time row so a reader can discount it.
 
 ## Queries the script runs
 
