@@ -143,8 +143,9 @@ the behaviour is part of the grammar and the hint line must match it:
   scaled so the point under the cursor stays under the cursor.
 - Wheel zooms. Two-finger drag translates and pinch zooms.
 - Keyboard, once the canvas has focus (click it or tab to it; it shows a
-  focus ring): arrows or WASD pan, R/F or PageUp/PageDown move up and down,
-  + and - zoom, 0 or Home resets the view.
+  focus ring): arrows or WASD pan, Q/E orbit, R/F or PageUp/PageDown move up
+  and down, + and - zoom, 0 or Home resets the view. Block labels are
+  focusable buttons: Tab to one and press Enter or Space to open its readout.
 - Only a left click picks a block. Middle-click autoscroll and the context
   menu are suppressed on the canvas.
 - Any manual move switches auto-orbit off; the button switches it back on.

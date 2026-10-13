@@ -21,16 +21,23 @@ checked before it is published.
       `planned` with the tracker id in `where`; known wrong is `gap` with the
       tracker id.
 - [ ] Check every path against the main branch, not the working tree:
-      ```sh
-      git fetch origin main
-      for p in $(grep -o '"[A-Za-z0-9_./-]*\.\(rs\|ts\|py\|go\|yaml\|md\)' page.html | tr -d '"' | sort -u); do
-        git cat-file -e "origin/main:$p" 2>/dev/null || echo "MISSING $p"
-      done
+      Export the resolved `where` entries from the open page (the template
+      sets `window.DIAGRAMS`, so prefix constants are already expanded). In
+      the browser console:
+      ```js
+      copy([...new Set(DIAGRAMS.flatMap(d => d.nodes.flatMap(n => n.where || [])))]
+        .filter(w => !w.startsWith("tracker:")).join("\n"))
       ```
-      Paths built from prefix constants (`K + "slices/create/"`) need the
-      prefix expanded; the quickest way is to log `DIAGRAMS.flatMap(d => d.nodes.flatMap(n => n.where))`
-      in the browser console and feed that list to the loop. Directory paths
-      (`.../slices/create/`) pass `cat-file -e` on the tree object.
+      Paste the list into `paths.txt`, then check each one at the SHA you
+      read the code at (any extension, files or directories):
+      ```sh
+      git fetch origin main && sha=$(git rev-parse origin/main)
+      while IFS= read -r p; do
+        git cat-file -e "$sha:$p" 2>/dev/null || echo "MISSING $p"
+      done < paths.txt
+      ```
+      Directory paths (`.../slices/create/`) pass `cat-file -e` on the tree
+      object.
 - [ ] Nothing private in `what`, `sub`, `notes` or any label: no note text,
       no titles, no personal paths, no hostnames. Screens show placeholder
       bars. The engine's `screenTexture()` draws bars; do not replace it with
@@ -60,8 +67,8 @@ checked before it is published.
 ## 3. Check the page
 
 - [ ] Extract the inline script and syntax-check it. A missing comma in a
-      600-line data literal is the most common failure and the page shows
-      nothing but the fallback message:
+      600-line data literal is the most common failure, and it stops the
+      whole script, so the stage and readout stay empty:
       ```sh
       awk '/^<script>$/{f=1;next} /^<\/script>$/{f=0} f' page.html > /tmp/page-script.js
       node --check /tmp/page-script.js
@@ -84,7 +91,8 @@ checked before it is published.
       Below 560px: sublines hide except on the selected block.
 - [ ] Work the controls: left-drag orbits; right-drag, middle-drag and
       shift-drag translate with the point under the cursor staying put;
-      wheel zooms; click the canvas and use arrows or WASD, R/F, +/- and 0.
+      wheel zooms; click the canvas and use arrows or WASD, Q/E, R/F, +/-
+      and 0; tab to a block label and press Enter.
       A middle-drag must not start the browser's autoscroll, and a
       right-click must not open the context menu or pick a block. Pinch and
       two-finger drag on a touch device if one is at hand. Toggle auto-orbit

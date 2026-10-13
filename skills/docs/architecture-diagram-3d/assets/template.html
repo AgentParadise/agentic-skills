@@ -202,11 +202,11 @@ section.open { display: grid; grid-template-columns: repeat(auto-fit, minmax(260
       title: "One request, from the client to a stored record",
       intro: [
         "Four floors, read bottom to top. The left half is the write side: a command becomes a fact on the log. The right half, behind the glass wall, is where the payload bytes live.",
-        "The two sides meet in one place: the reader on the top floor, which exchanges a reference for bytes. Nothing else carries payload across the wall."
+        "Payload crosses the wall in exactly two places, both through the blob store: the handler's PUT on the way in, and the reader on the top floor, which takes a content reference from the left and resolves it to bytes on the right. The log and the projection never hold payload."
       ],
       read: [
         "Cyan lines are facts appended to the log.",
-        "Amber lines carry bytes. Follow the long one from the blob store to the top floor.",
+        "Amber lines carry bytes. One crosses the wall on the way in (the PUT); the other stays behind it, from the blob store up to the reader.",
         "Green lines are the read path.",
         "Violet blocks are planned; red blocks are known gaps."
       ],
@@ -250,11 +250,13 @@ section.open { display: grid; grid-template-columns: repeat(auto-fit, minmax(260
         { a: "handler", b: "log", k: "event", t: "② append fact", bend: [0, 1.6, 0] },
         { a: "log", b: "proj", k: "derive" },
         { a: "proj", b: "log", k: "derive", dash: true, t: "drop + replay = same state", bend: [-3, 1.5, -2] },
-        { a: "proj", b: "reader", k: "read", t: "content ref" },
-        { a: "blobs", b: "reader", k: "content", t: "bytes cross only here", bend: [2.6, 0, 1.2] }
+        { a: "proj", b: "reader", k: "read", t: "content ref crosses", dash: true },
+        { a: "blobs", b: "reader", k: "content", t: "bytes out, only to the reader", bend: [2.6, 0, 1.2], dash: true }
       ]
     }
   ];
+  // Exposed for the path check in references/build-checklist.md; the page itself never reads it.
+  window.DIAGRAMS = DIAGRAMS;
 
   // ---------------------------------------------------------------- three setup
   const canvas = document.getElementById("gl");
@@ -434,7 +436,13 @@ section.open { display: grid; grid-template-columns: repeat(auto-fit, minmax(260
       S.meshes.push(m);
       const html = '<span class="n">' + esc(n.label) + '</span><span class="s">' + esc(n.sub || "") + "</span>";
       const el = makeLabel(root, "node", html, n.st);
+      el.tabIndex = 0;
+      el.setAttribute("role", "button");
+      el.setAttribute("aria-label", n.label + (n.sub ? ", " + n.sub : ""));
       el.addEventListener("click", (ev) => { ev.stopPropagation(); select(n.id); });
+      el.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); select(n.id); }
+      });
       const top = n.shape === "anchor" ? 0.45 : (n.shape === "screen" ? n.s[1] / 2 + 0.15 : n.s[1] / 2 + 0.12);
       const L = { el, pos: new THREE.Vector3(n.p[0], n.p[1] + top, n.p[2]), kind: "node", id: n.id };
       S.labels.push(L);
@@ -556,7 +564,7 @@ section.open { display: grid; grid-template-columns: repeat(auto-fit, minmax(260
   canvas.addEventListener("pointerup", endPointer);
   canvas.addEventListener("pointercancel", (ev) => { pointers.delete(ev.pointerId); mid = null; canvas.classList.remove("dragging"); });
   canvas.addEventListener("auxclick", (ev) => ev.preventDefault());
-  canvas.addEventListener("wheel", (ev) => { ev.preventDefault(); view.dist = clamp(view.dist * (1 + Math.sign(ev.deltaY) * 0.08), 6, 90); }, { passive: false });
+  canvas.addEventListener("wheel", (ev) => { ev.preventDefault(); zoom(1 + Math.sign(ev.deltaY) * 0.08); }, { passive: false });
   canvas.addEventListener("contextmenu", (ev) => ev.preventDefault());
 
   // Translate the orbit target in screen space: the point under the cursor stays under the cursor.
@@ -573,6 +581,8 @@ section.open { display: grid; grid-template-columns: repeat(auto-fit, minmax(260
   }
   function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
   function lift(units) { view.target.y += units; if (autoSpin) setSpin(false); }
+  function zoom(f) { view.dist = clamp(view.dist * f, 6, 90); if (autoSpin) setSpin(false); }
+  function orbit(d) { view.theta += d; if (autoSpin) setSpin(false); }
 
   // Keyboard: the canvas is focusable (click or tab to it; a focus ring shows).
   canvas.tabIndex = 0;
@@ -585,8 +595,10 @@ section.open { display: grid; grid-template-columns: repeat(auto-fit, minmax(260
     else if (k === "arrowdown" || k === "s") pan(0, -step);
     else if (k === "r" || k === "pageup") lift(up);
     else if (k === "f" || k === "pagedown") lift(-up);
-    else if (k === "+" || k === "=") view.dist = clamp(view.dist * 0.92, 6, 90);
-    else if (k === "-" || k === "_") view.dist = clamp(view.dist * 1.08, 6, 90);
+    else if (k === "q") orbit(-0.08);
+    else if (k === "e") orbit(0.08);
+    else if (k === "+" || k === "=") zoom(0.92);
+    else if (k === "-" || k === "_") zoom(1.08);
     else if (k === "0" || k === "home") resetCamera();
     else return;
     ev.preventDefault();
@@ -608,10 +620,10 @@ section.open { display: grid; grid-template-columns: repeat(auto-fit, minmax(260
   function legendHTML() {
     return '<div class="legend">' +
       '<div><h3>Status</h3><div class="row">' +
-      ["built", "partial", "planned", "gap"].map((s) => '<span class="chip ' + s + '">' + STATUS_TEXT[s] + "</span>").join("") +
+      Object.keys(STATUS_TEXT).map((s) => '<span class="chip ' + s + '">' + esc(STATUS_TEXT[s]) + "</span>").join("") +
       "</div></div>" +
       '<div><h3>Lines</h3><div class="row">' +
-      ["event", "content", "read", "derive"].map((k) => '<span class="key" style="--k:var(--' + k + ')"><i></i>' + esc(EDGE_TEXT[k]) + "</span>").join("") +
+      Object.keys(EDGE_TEXT).map((k) => '<span class="key" style="--k:var(--' + k + ')"><i></i>' + esc(EDGE_TEXT[k]) + "</span>").join("") +
       '<span class="key" style="--k:var(--ink-dim)"><i class="dash"></i>Reference or planned</span>' +
       "</div></div></div>";
   }

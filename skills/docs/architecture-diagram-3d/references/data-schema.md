@@ -154,7 +154,8 @@ The engine reads colours from CSS custom properties on `:root` (`--event`,
 `--gap`). Rename a meaning by changing `EDGE_TEXT` and `STATUS_TEXT` near the
 top of the script; the legend and the readout chips follow. Add a new edge
 kind by adding a token, an `EDGE_TEXT` entry and a `COL` entry; the builder
-needs no change.
+and the legend (built from the keys of `EDGE_TEXT` and `STATUS_TEXT`) need no
+change.
 
 ## Sizing guidance from the reference
 
