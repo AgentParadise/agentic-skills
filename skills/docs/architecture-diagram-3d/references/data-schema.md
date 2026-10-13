@@ -71,6 +71,26 @@ configurable per floor, which keeps them uniform across views.
 dashed chip text, `lp` where the chip is anchored (usually the top front
 corner of the pane).
 
+Three optional fields turn a wall into a frame for a package or an isolation
+unit:
+
+```js
+{ p: [-0.5, 4.35, 0], s: [20.6, 2, 7.6], tone: "built", op: 0.04,
+  label: "Package boundary (checked by a gate)", lp: [-10.4, 5.5, 3.8] },
+{ p: [0, 5.6, 0], s: [24.6, 6.4, 9.2], tone: "event", op: 0.02, dash: true,
+  label: "Isolation unit", lp: [-12.2, 8.9, 4.6] }
+```
+
+- `tone`: any status or flow token (`built`, `partial`, `planned`, `gap`,
+  `event`, `content`, `read`, `derive`). Default `content` (amber), the
+  security boundary. The face, the outline and the label all take the tone.
+- `op`: face opacity. Default 0.07. Frames that enclose blocks want 0.02 to
+  0.04 so the blocks stay readable through them.
+- `dash: true`: dashed outline, for an isolation unit or anything planned.
+
+A full box (`s` with no thin dimension) frames a region; a thin pane divides
+one. See `visual-grammar.md` for which tone means what.
+
 ### `columns`
 
 ```js
@@ -145,6 +165,7 @@ needs no change.
 | projections            | 3      | [24, 12]  | 11    | 12    | 25       |
 | slice anatomy          | 4      | [26, 9]   | 11    | 6     | 30       |
 | landing room           | 1      | [14, 10]  | 7     | 6     | 19       |
+| target (3 framing walls) | 4    | [26, 10]  | 14    | 12    | 34       |
 
 Above about 25 nodes a view stops being readable from the reset camera.
 Split it.

@@ -69,6 +69,7 @@ nav.views button:focus-visible, .btn:focus-visible { outline: 2px solid var(--co
 .stage canvas { display: block; width: 100%; height: 100%; cursor: grab; touch-action: none; }
 .stage canvas.dragging { cursor: grabbing; }
 .stage canvas.hovering { cursor: pointer; }
+.stage canvas:focus-visible { outline: 2px solid var(--content); outline-offset: -2px; }
 .labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
 .lbl { position: absolute; left: 0; top: 0; transform-origin: 50% 100%; white-space: nowrap; pointer-events: auto; cursor: pointer; text-align: center; will-change: transform; }
 .lbl .n { display: inline-block; font: 600 13px/1.15 var(--display); letter-spacing: .03em; color: var(--ink); background: rgba(10,14,20,.78); border: 1px solid var(--rule); border-left: 3px solid var(--st, var(--built)); padding: 3px 7px 3px 6px; border-radius: 2px; }
@@ -81,6 +82,7 @@ nav.views button:focus-visible, .btn:focus-visible { outline: 2px solid var(--co
 .lbl.edge .n { font: 500 10.5px/1.2 var(--mono); letter-spacing: 0; border: 0; border-radius: 2px; padding: 1px 5px; color: var(--ek, var(--event)); background: rgba(10,14,20,.82); }
 .lbl.wall { pointer-events: none; }
 .lbl.wall .n { border: 1px dashed var(--content); border-left: 1px dashed var(--content); color: var(--content); background: rgba(10,14,20,.7); font-size: 12px; }
+.lbl.wall.toned .n { border-color: var(--wt); color: var(--wt); }
 .stage-tools { position: absolute; right: 10px; bottom: 10px; display: flex; gap: 6px; }
 .btn { font: 500 11px/1 var(--mono); color: var(--ink-dim); background: rgba(17,24,33,.9); border: 1px solid var(--rule); border-radius: 3px; padding: 7px 9px; cursor: pointer; }
 .btn:hover { color: var(--ink); }
@@ -137,7 +139,7 @@ section.open { display: grid; grid-template-columns: repeat(auto-fit, minmax(260
     <div class="stage" id="stage">
       <canvas id="gl" aria-label="Interactive 3D architecture diagram"></canvas>
       <div class="labels" id="labels"></div>
-      <div class="hint">Drag to orbit · shift-drag to pan · scroll or pinch to zoom · click a block for detail</div>
+      <div class="hint">Left-drag orbit · right/middle/shift-drag move · R/F up/down · scroll or pinch zoom · click a block</div>
       <div class="stage-tools">
         <button class="btn" id="spin" type="button" aria-pressed="true">Auto-orbit on</button>
         <button class="btn" id="reset" type="button">Reset view</button>
@@ -365,14 +367,19 @@ section.open { display: grid; grid-template-columns: repeat(auto-fit, minmax(260
       desk.position.set(0, 0.45, fd / 2 - 1.8); scene.add(desk); boxEdges(desk, "#3b5170", 0.7);
     }
 
-    // walls: translucent boundaries (security, authorization, trust)
+    // walls: translucent boundaries. Default tone is content (amber) for a security or authorization
+    // boundary; `tone` takes any status or flow token, `op` sets opacity, `dash` dashes the outline.
+    // A thin pane (one dimension 0.06) is a wall; a full box frames a package or isolation unit.
     d.walls.forEach((w) => {
+      const tone = COL[w.tone || "content"];
       const m = new THREE.Mesh(new THREE.BoxGeometry(w.s[0], w.s[1], w.s[2]),
-        new THREE.MeshStandardMaterial({ color: col(COL.content), transparent: true, opacity: 0.07, roughness: 0.2, depthWrite: false, side: THREE.DoubleSide }));
+        new THREE.MeshStandardMaterial({ color: col(tone), transparent: true, opacity: w.op != null ? w.op : 0.07, roughness: 0.2, depthWrite: false, side: THREE.DoubleSide }));
       m.position.set(w.p[0], w.p[1], w.p[2]);
       scene.add(m);
-      boxEdges(m, COL.content, 0.55);
+      const we = boxEdges(m, tone, 0.55);
+      if (w.dash) { we.material = new THREE.LineDashedMaterial({ color: col(tone), dashSize: 0.35, gapSize: 0.25, transparent: true, opacity: 0.7 }); we.computeLineDistances(); }
       const el = makeLabel(root, "wall", '<span class="n">' + esc(w.label) + "</span>");
+      if (w.tone) { el.style.setProperty("--wt", tone); el.classList.add("toned"); }
       S.labels.push({ el, pos: new THREE.Vector3(w.lp[0], w.lp[1], w.lp[2]), kind: "wall" });
     });
 
@@ -496,15 +503,24 @@ section.open { display: grid; grid-template-columns: repeat(auto-fit, minmax(260
   }
   document.getElementById("reset").addEventListener("click", () => { resetCamera(); });
 
+  // Controls: left-drag orbits; right-drag, middle-drag or shift-drag translates (pans);
+  // two fingers pinch to zoom and drag to translate; arrow keys / WASD pan, R/F (or PageUp/PageDown) move up/down,
+  // +/- zoom, 0/Home resets. Only a left click picks.
   const pointers = new Map();
-  let dragMoved = 0, pinchStart = 0, distStart = 0, downAt = null;
+  let dragMoved = 0, pinchStart = 0, distStart = 0, downAt = null, mid = null;
+  function midpoint() {
+    const ps = [...pointers.values()];
+    return { x: (ps[0].x + ps[1].x) / 2, y: (ps[0].y + ps[1].y) / 2 };
+  }
   canvas.addEventListener("pointerdown", (ev) => {
+    if (ev.button === 1) ev.preventDefault(); // stop the browser's middle-click autoscroll
     canvas.setPointerCapture(ev.pointerId);
-    pointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
-    dragMoved = 0; downAt = { x: ev.clientX, y: ev.clientY };
+    pointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY, btn: ev.button });
+    dragMoved = 0; downAt = { x: ev.clientX, y: ev.clientY, btn: ev.button };
     if (pointers.size === 2) {
       const [p1, p2] = [...pointers.values()];
       pinchStart = Math.hypot(p1.x - p2.x, p1.y - p2.y); distStart = view.dist;
+      mid = midpoint();
     }
     canvas.classList.add("dragging");
   });
@@ -517,8 +533,11 @@ section.open { display: grid; grid-template-columns: repeat(auto-fit, minmax(260
     if (pointers.size === 2) {
       const [p1, p2] = [...pointers.values()];
       const dd = Math.hypot(p1.x - p2.x, p1.y - p2.y);
-      if (pinchStart > 0) view.dist = clamp(distStart * pinchStart / dd, 6, 90);
-    } else if (ev.shiftKey || ev.button === 2) {
+      if (pinchStart > 0 && dd > 0) view.dist = clamp(distStart * pinchStart / dd, 6, 90);
+      const m = midpoint();
+      if (mid) pan(m.x - mid.x, m.y - mid.y);
+      mid = m;
+    } else if (p.btn === 1 || p.btn === 2 || ev.shiftKey) {
       pan(dx, dy);
     } else {
       view.theta -= dx * 0.006;
@@ -528,24 +547,50 @@ section.open { display: grid; grid-template-columns: repeat(auto-fit, minmax(260
   });
   function endPointer(ev) {
     pointers.delete(ev.pointerId);
-    if (pointers.size < 2) pinchStart = 0;
+    if (pointers.size < 2) { pinchStart = 0; mid = null; }
     if (pointers.size === 0) {
       canvas.classList.remove("dragging");
-      if (dragMoved < 5 && downAt) pick(ev);
+      if (dragMoved < 5 && downAt && downAt.btn === 0) pick(ev);
     }
   }
   canvas.addEventListener("pointerup", endPointer);
-  canvas.addEventListener("pointercancel", (ev) => { pointers.delete(ev.pointerId); canvas.classList.remove("dragging"); });
+  canvas.addEventListener("pointercancel", (ev) => { pointers.delete(ev.pointerId); mid = null; canvas.classList.remove("dragging"); });
+  canvas.addEventListener("auxclick", (ev) => ev.preventDefault());
   canvas.addEventListener("wheel", (ev) => { ev.preventDefault(); view.dist = clamp(view.dist * (1 + Math.sign(ev.deltaY) * 0.08), 6, 90); }, { passive: false });
   canvas.addEventListener("contextmenu", (ev) => ev.preventDefault());
 
+  // Translate the orbit target in screen space: the point under the cursor stays under the cursor.
+  const panRight = new THREE.Vector3(), panUp = new THREE.Vector3();
   function pan(dx, dy) {
-    const s = view.dist * 0.0016;
-    const right = new THREE.Vector3(Math.cos(view.theta), 0, -Math.sin(view.theta));
-    view.target.addScaledVector(right, -dx * s);
-    view.target.y += dy * s;
+    const h = Math.max(1, stage.clientHeight);
+    const s = (2 * view.dist * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))) / h;
+    camera.updateMatrixWorld();
+    panRight.setFromMatrixColumn(camera.matrixWorld, 0);
+    panUp.setFromMatrixColumn(camera.matrixWorld, 1);
+    view.target.addScaledVector(panRight, -dx * s);
+    view.target.addScaledVector(panUp, dy * s);
+    if (autoSpin) setSpin(false);
   }
   function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function lift(units) { view.target.y += units; if (autoSpin) setSpin(false); }
+
+  // Keyboard: the canvas is focusable (click or tab to it; a focus ring shows).
+  canvas.tabIndex = 0;
+  canvas.addEventListener("keydown", (ev) => {
+    const step = 40, up = view.dist * 0.04;
+    const k = ev.key.toLowerCase();
+    if (k === "arrowleft" || k === "a") pan(step, 0);
+    else if (k === "arrowright" || k === "d") pan(-step, 0);
+    else if (k === "arrowup" || k === "w") pan(0, step);
+    else if (k === "arrowdown" || k === "s") pan(0, -step);
+    else if (k === "r" || k === "pageup") lift(up);
+    else if (k === "f" || k === "pagedown") lift(-up);
+    else if (k === "+" || k === "=") view.dist = clamp(view.dist * 0.92, 6, 90);
+    else if (k === "-" || k === "_") view.dist = clamp(view.dist * 1.08, 6, 90);
+    else if (k === "0" || k === "home") resetCamera();
+    else return;
+    ev.preventDefault();
+  });
 
   function ndc(ev) {
     const r = canvas.getBoundingClientRect();

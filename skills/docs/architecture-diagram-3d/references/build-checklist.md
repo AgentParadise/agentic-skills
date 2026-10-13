@@ -48,6 +48,9 @@ checked before it is published.
 - [ ] Add edges, labelling only crossings and ordered steps. Add `bend` where
       two edges overlap or an edge passes through a block.
 - [ ] Add walls where a boundary exists, with the label naming the crossing.
+      Use the default amber pane for a security boundary; use a toned,
+      faint, dashed frame (`tone`, `op`, `dash`) for a package or isolation
+      boundary.
 - [ ] Write `intro` as the property the view proves, and `read` as the
       colours and shapes used in this view, in the reader's order of noticing.
 - [ ] Repeat per view. Every view is one more array entry; if adding a view
@@ -66,8 +69,10 @@ checked before it is published.
       The template's script tags sit alone on their lines so this `awk`
       works; keep them that way. The three.js `<script src>` line is excluded
       because it is not `^<script>$`.
-- [ ] Open the page (locally with the skeleton prepended, or as a draft
-      artifact) and visit every tab. Check the browser console for the
+- [ ] Open the page and visit every tab. The template is wrapper-free, as a
+      published artifact expects; to open the file locally, prepend
+      `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">`
+      to a copy (not to the file you publish). Check the browser console for the
       "edge references unknown node" warning.
 - [ ] From each reset camera, read the labels. Overlapping labels mean two
       blocks are too close or the camera is too far; move the block or lower
@@ -77,8 +82,16 @@ checked before it is published.
       overview.
 - [ ] Narrow the window below 980px: the readout stacks under the stage.
       Below 560px: sublines hide except on the selected block.
-- [ ] Toggle auto-orbit off and on; drag; shift-drag; wheel; pinch on a
-      touch device if one is at hand. Reset view returns to `cam`.
+- [ ] Work the controls: left-drag orbits; right-drag, middle-drag and
+      shift-drag translate with the point under the cursor staying put;
+      wheel zooms; click the canvas and use arrows or WASD, R/F, +/- and 0.
+      A middle-drag must not start the browser's autoscroll, and a
+      right-click must not open the context menu or pick a block. Pinch and
+      two-finger drag on a touch device if one is at hand. Toggle auto-orbit
+      off and on; Reset view returns to `cam`.
+- [ ] If you change the controls, change the hint line in the stage and the
+      Controls section of `visual-grammar.md` in the same edit. The hint is
+      the only on-page documentation.
 - [ ] Temporarily block the three.js URL (or rename it) and confirm the
       fallback message appears in the readout instead of a blank stage.
 - [ ] `grep -cP '\x{2014}' page.html` is 0 if the house style forbids em

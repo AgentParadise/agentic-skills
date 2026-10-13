@@ -62,7 +62,7 @@ Signals: a new view is one more `DIAGRAMS` entry and no engine edit; the engine 
 Signals: screens show placeholder bars; no label, note or path contains note text, titles, home paths or hostnames; the page can be shared outside the team as-is.
 
 ### The page works where it is opened
-Signals: it orbits with mouse, trackpad and touch; the readout stacks on a phone; reduced motion slows the pulses and stops the auto-orbit; a failed three.js load shows a message, not a blank stage.
+Signals: it orbits, translates and zooms with mouse, trackpad, touch and keyboard; the readout stacks on a phone; reduced motion slows the pulses and stops the auto-orbit; a failed three.js load shows a message, not a blank stage.
 
 ## Recommended tools and practices (as of 2026-10-12)
 
@@ -73,7 +73,7 @@ Signals: it orbits with mouse, trackpad and touch; the readout stacks on a phone
 
 ### For: one legend across views
 - The grammar in `references/visual-grammar.md`, applied unchanged: cyan facts, amber bytes, green reads, grey derives; dashed references; cubes for bytes and spheres for facts. Extending it means a new token, a legend entry and a `COL` entry, not a borrowed colour.
-- Translucent amber walls for every security or authorization boundary, labelled with where the one crossing is, and the crossing edge labelled too. Readers misunderstand the boundary more than anything else on the page.
+- Translucent amber walls for every security or authorization boundary, labelled with where the one crossing is, and the crossing edge labelled too. Readers misunderstand the boundary more than anything else on the page. Toned, faint, dashed frames (`tone`, `op`, `dash`) for package and isolation boundaries, so a reader can tell "may not see" from "may not depend on" from "blast radius".
 
 ### For: data only
 - The `DIAGRAMS` array and the generic `buildScene` from `assets/template.html`. The reference's five views share one builder; `columns` and `room` were added generically when the slice and landing views needed them.
@@ -84,7 +84,7 @@ Signals: it orbits with mouse, trackpad and touch; the readout stacks on a phone
 - Describe the kind of record in `what`, never an instance. "The note's bytes, addressed by hash", not the note.
 
 ### For: works where opened
-- three.js r128 UMD from cdnjs, the hand-written orbit in the template (drag, shift-drag to pan, wheel, pinch), `ResizeObserver` for the stage, `prefers-reduced-motion` honoured, and HTML labels projected per frame and scaled by distance with edge labels fading when far. These are all in the template; keep them when editing the engine.
+- three.js r128 UMD from cdnjs, the hand-written controls in the template (left-drag orbits; right-, middle- or shift-drag translates in screen space; wheel and pinch zoom; two-finger drag translates; arrows or WASD, R/F, +/- and 0 on a focusable canvas; only a left click picks), `ResizeObserver` for the stage, `prefers-reduced-motion` honoured, and HTML labels projected per frame and scaled by distance with edge labels fading when far. These are all in the template; keep them when editing the engine.
 - `node --check` on the extracted script before every publish. One missing comma is the most common way this page ships broken.
 - The host's own artifact page contract for publishing (CDN allowlist, title, theme tokens, size). This skill does not duplicate those rules because they change with the host.
 
@@ -94,7 +94,7 @@ Signals: it orbits with mouse, trackpad and touch; the readout stacks on a phone
 - `references/visual-grammar.md`: what every shape, colour, dash, pulse and surface means, and the five-view set. Read during steps 2, 4 and 5.
 - `references/data-schema.md`: every field of a `DIAGRAMS` entry, units, camera, and sizing guidance from the reference. Read during step 3.
 - `references/build-checklist.md`: the step-by-step checklist from reading the code to keeping the page true after publishing, with the path-check and `node --check` snippets. Read during steps 1, 7, 8 and 9.
-- Live example: https://claude.ai/artifact/HnENkkWr7qKV23mYB3tnVU (five views of a knowledge vertical, the page this skill was distilled from).
+- Live example: https://claude.ai/artifact/HnENkkWr7qKV23mYB3tnVU (six views of a knowledge vertical, the page this skill was distilled from).
 
 ## Continual improvement
 

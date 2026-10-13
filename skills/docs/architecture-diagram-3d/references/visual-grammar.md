@@ -59,14 +59,33 @@ reader should be able to look through them to what does.
 
 ## Walls are boundaries
 
-- A wall is a tall, nearly transparent amber pane with a dashed label.
-- It marks a security, authorization or trust boundary: what one side can
-  see that the other cannot.
-- The wall label says where the one legitimate crossing is ("bytes only
-  through the blob store"), and the edge that crosses it is labelled too.
-  The boundary is the thing readers most misunderstand, so it earns both.
+- A wall is a tall, nearly transparent pane with a dashed label. Its tone
+  says what kind of boundary it is.
+- The default tone is amber (the content token): a security, authorization
+  or trust boundary, what one side can see that the other cannot. The wall
+  label says where the one legitimate crossing is ("bytes only through the
+  blob store"), and the edge that crosses it is labelled too. The boundary is
+  the thing readers most misunderstand, so it earns both.
 - A wall that nothing crosses is suspicious: either the crossing is missing
   from the diagram, or the boundary is not real.
+- Other tones mark other boundaries. A wall takes `tone` (any status or flow
+  token), `op` (opacity) and `dash` (dashed outline), and its label takes the
+  tone colour. Use a full box, not a pane, to frame a region:
+  - teal (`built`), solid outline, low opacity: a **package boundary** that
+    a gate checks, drawn around the floor the package owns;
+  - cyan (`event`), dashed, very low opacity: an **isolation unit** (a
+    tenant, a compartment, a blast radius), drawn around everything it
+    contains;
+  - violet (`planned`), dashed, faint: a **later** isolation unit or
+    package, placed behind the current one to say the architecture leaves
+    room for it.
+  The reference's Target view used all three at once: a teal frame around
+  the standalone package, a cyan frame around the whole first compartment,
+  and a faint violet frame behind it for the next compartment, with the
+  amber bytes wall still inside.
+- Keep framing walls faint (`op` 0.02 to 0.04). They are context, and a
+  reader should see the blocks through them. The amber bytes wall stays at
+  the default 0.07 because it is the point of its view.
 
 ## Edges are kinds of flow
 
@@ -114,6 +133,23 @@ reader should be able to look through them to what does.
 - The room view earns its place by showing the final hop: the one edge that
   carries bytes into the user's view, and the one fact that says where.
 
+## Controls
+
+The stage is driven by hand-written orbit code, not a library control, so
+the behaviour is part of the grammar and the hint line must match it:
+
+- Left-drag orbits. Right-drag, middle-drag or shift-drag translates in
+  screen space: the target moves along the camera's right and up vectors,
+  scaled so the point under the cursor stays under the cursor.
+- Wheel zooms. Two-finger drag translates and pinch zooms.
+- Keyboard, once the canvas has focus (click it or tab to it; it shows a
+  focus ring): arrows or WASD pan, R/F or PageUp/PageDown move up and down,
+  + and - zoom, 0 or Home resets the view.
+- Only a left click picks a block. Middle-click autoscroll and the context
+  menu are suppressed on the canvas.
+- Any manual move switches auto-orbit off; the button switches it back on.
+  Reduced motion starts with it off and slows the pulses.
+
 ## The readout panel
 
 - Overview (no selection): the view's number and title, two or three intro
@@ -127,8 +163,8 @@ reader should be able to look through them to what does.
 
 ## The set of views that covers a vertical
 
-Five views were enough for a full vertical in the reference. Reuse the set
-when the system has the same shape:
+Six views covered a full vertical and its target in the reference. Reuse the
+set when the system has the same shape:
 
 1. **The full vertical.** Every floor, both halves, the long edges. The
    establishing shot.
@@ -141,8 +177,13 @@ when the system has the same shape:
    gate that checks the boundaries.
 5. **The landing scene.** The room, its anchors, the screen, and the final
    hop.
+6. **The target.** Where the architecture is headed: the same floors
+   regrouped as packages and isolation units with toned framing walls, and
+   planned blocks for the room the design must leave. Add this view when a
+   design decision has been ruled and the code has not caught up; it is the
+   one view where most blocks are `planned`.
 
-Not every system has all five. A system with no trust boundary has no wall
+Not every system has all six. A system with no trust boundary has no wall
 and no boundary view; drawing one anyway invents a property the code does not
 have.
 
