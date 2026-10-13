@@ -1,0 +1,8 @@
+[
+{"isDraft":true,"isPrerelease":false,"publishedAt":null,"tagName":"v1.4.0"},
+{"isDraft":false,"isPrerelease":true,"publishedAt":"2026-10-08T06:00:00Z","tagName":"v1.3.1-rc.1"},
+{"isDraft":false,"isPrerelease":false,"publishedAt":"2026-10-08T00:00:00Z","tagName":"v1.3.0"},
+{"isDraft":false,"isPrerelease":false,"publishedAt":"2026-10-03T12:00:00Z","tagName":"v1.2.1"},
+{"isDraft":false,"isPrerelease":false,"publishedAt":"2026-10-02T00:00:00Z","tagName":"v1.2.0"},
+{"isDraft":false,"isPrerelease":false,"publishedAt":"2026-09-01T06:00:00Z","tagName":"v1.1.0"}
+]
