@@ -1,0 +1,738 @@
+<!--
+  architecture-diagram-3d starter template.
+
+  Copy this file, replace the {{PLACEHOLDERS}}, and replace the one worked
+  example view in DIAGRAMS with your own views. Everything below DIAGRAMS is
+  the engine: one generic builder renders every view, so adding a view is
+  data only. See references/data-schema.md for every field and
+  references/visual-grammar.md for what each shape and colour means.
+
+  This file is written as artifact page content, the shape the reference
+  implementation was published in: no doctype, html, head or body wrapper,
+  because an artifact host adds that skeleton at publish time. To open it
+  directly from disk instead, prepend:
+    <!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+
+  The only external script is three.js r128 (UMD) from cdnjs. Fonts come from
+  Google Fonts. Before publishing, extract the script and run `node --check`
+  (see references/build-checklist.md).
+-->
+<title>{{Two To Four Word Title}}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a console page. Header + view switcher on top, the 3D stage takes the left, a readout panel on the right (stacks under the stage on phones). One deliberate dark theme: it is a console, not a document. */
+:root {
+  color-scheme: dark;
+  --void: #0a0e14;        /* page ground */
+  --hull: #111821;        /* panels */
+  --hull-2: #17212d;      /* raised */
+  --rule: #253244;        /* hairlines */
+  --ink: #dbe4ee;         /* text */
+  --ink-dim: #8a9bb0;     /* secondary text */
+  /* Edge colours: one hue per KIND of flow. Keep the mapping strict. */
+  --event: #5fd4e8;       /* facts, events, commands */
+  --content: #f2b54a;     /* bytes, payloads, content */
+  --read: #a7e07a;        /* read path */
+  --derive: #9aa6b8;      /* derive, fold, plain call */
+  /* Status colours: built, partial, planned, gap. */
+  --built: #3fbfa4;
+  --partial: #e8a33d;
+  --planned: #9b8cf2;
+  --gap: #ef6461;
+  --display: "Saira Condensed", "Arial Narrow", system-ui, sans-serif;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+html, body { height: 100%; }
+body { background: var(--void); color: var(--ink); font-family: var(--body); font-size: 14px; line-height: 1.5; }
+.wrap { padding-inline: 16px; padding-block: 14px 28px; max-width: 1480px; margin: 0 auto; display: grid; gap: 14px; }
+header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; }
+.brand { min-width: 0; }
+.eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-dim); }
+h1 { font-family: var(--display); font-weight: 700; font-size: clamp(26px, 3.4vw, 38px); line-height: 1.05; margin: 2px 0 0; letter-spacing: .01em; text-wrap: balance; }
+h1 span { color: var(--event); }
+nav.views { display: flex; flex-wrap: wrap; gap: 6px; }
+nav.views button {
+  font: 600 13px/1 var(--display); letter-spacing: .06em; text-transform: uppercase;
+  color: var(--ink-dim); background: var(--hull); border: 1px solid var(--rule); border-radius: 3px;
+  padding: 9px 12px; cursor: pointer; display: flex; gap: 8px; align-items: baseline;
+}
+nav.views button b { font-family: var(--mono); font-weight: 500; font-size: 11px; color: var(--ink-dim); opacity: .7; }
+nav.views button:hover { color: var(--ink); border-color: #3a4c63; }
+nav.views button[aria-selected="true"] { color: var(--void); background: var(--event); border-color: var(--event); }
+nav.views button[aria-selected="true"] b { color: var(--void); }
+nav.views button:focus-visible, .btn:focus-visible { outline: 2px solid var(--content); outline-offset: 2px; }
+
+.console { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 14px; align-items: stretch; }
+.stage { position: relative; min-width: 0; height: min(76vh, 760px); min-height: 440px; background: radial-gradient(ellipse at 50% 30%, #121c28 0%, var(--void) 70%); border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; }
+.stage canvas { display: block; width: 100%; height: 100%; cursor: grab; touch-action: none; }
+.stage canvas.dragging { cursor: grabbing; }
+.stage canvas.hovering { cursor: pointer; }
+.stage canvas:focus-visible { outline: 2px solid var(--content); outline-offset: -2px; }
+.labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.lbl { position: absolute; left: 0; top: 0; transform-origin: 50% 100%; white-space: nowrap; pointer-events: auto; cursor: pointer; text-align: center; will-change: transform; }
+.lbl .n { display: inline-block; font: 600 13px/1.15 var(--display); letter-spacing: .03em; color: var(--ink); background: rgba(10,14,20,.78); border: 1px solid var(--rule); border-left: 3px solid var(--st, var(--built)); padding: 3px 7px 3px 6px; border-radius: 2px; }
+.lbl .s { display: block; font: 400 10.5px/1.25 var(--mono); color: var(--ink-dim); margin-top: 2px; text-shadow: 0 1px 2px #000; }
+.lbl.sel .n { background: var(--st, var(--built)); color: var(--void); border-color: var(--st, var(--built)); }
+.lbl.floor { pointer-events: none; cursor: default; text-align: left; }
+.lbl.floor .n { border-left-color: var(--rule); background: transparent; border: 0; color: var(--ink-dim); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; padding: 0; }
+.lbl.floor .k { font: 500 10px var(--mono); color: #5b6c82; margin-right: 6px; }
+.lbl.edge { pointer-events: none; cursor: default; }
+.lbl.edge .n { font: 500 10.5px/1.2 var(--mono); letter-spacing: 0; border: 0; border-radius: 2px; padding: 1px 5px; color: var(--ek, var(--event)); background: rgba(10,14,20,.82); }
+.lbl.wall { pointer-events: none; }
+.lbl.wall .n { border: 1px dashed var(--content); border-left: 1px dashed var(--content); color: var(--content); background: rgba(10,14,20,.7); font-size: 12px; }
+.lbl.wall.toned .n { border-color: var(--wt); color: var(--wt); }
+.stage-tools { position: absolute; right: 10px; bottom: 10px; display: flex; gap: 6px; }
+.btn { font: 500 11px/1 var(--mono); color: var(--ink-dim); background: rgba(17,24,33,.9); border: 1px solid var(--rule); border-radius: 3px; padding: 7px 9px; cursor: pointer; }
+.btn:hover { color: var(--ink); }
+.hint { position: absolute; left: 10px; bottom: 10px; font: 400 11px/1.3 var(--mono); color: #61728a; pointer-events: none; max-width: 60%; }
+
+aside.readout { background: var(--hull); border: 1px solid var(--rule); border-radius: 4px; padding: 16px; display: flex; flex-direction: column; gap: 14px; min-width: 0; max-height: min(76vh, 760px); overflow: auto; }
+.readout h2 { font: 700 22px/1.1 var(--display); margin: 0; letter-spacing: .01em; text-wrap: balance; }
+.readout h3 { font: 600 12px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-dim); margin: 0 0 6px; }
+.readout p { margin: 0; color: var(--ink); }
+.readout p + p { margin-top: 8px; }
+.readout ul { margin: 0; padding-left: 18px; display: grid; gap: 5px; }
+.readout code, .paths code { font-family: var(--mono); font-size: 11.5px; color: #c6d3e2; background: var(--hull-2); padding: 1px 4px; border-radius: 2px; word-break: break-word; }
+.paths { display: grid; gap: 4px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; font: 500 11px/1 var(--mono); text-transform: uppercase; letter-spacing: .08em; padding: 4px 7px; border-radius: 2px; border: 1px solid currentColor; }
+.chip::before { content: ""; width: 7px; height: 7px; background: currentColor; border-radius: 1px; }
+.chip.built { color: var(--built); } .chip.partial { color: var(--partial); } .chip.planned { color: var(--planned); } .chip.gap { color: var(--gap); }
+.legend { display: grid; gap: 10px; border-top: 1px solid var(--rule); padding-top: 12px; }
+.legend .row { display: flex; flex-wrap: wrap; gap: 6px 12px; }
+.key { display: inline-flex; align-items: center; gap: 7px; font: 400 12px/1.2 var(--body); color: var(--ink-dim); }
+.key i { width: 18px; height: 3px; border-radius: 2px; background: var(--k); display: inline-block; }
+.key i.dash { background: repeating-linear-gradient(90deg, var(--k) 0 4px, transparent 4px 7px); }
+.back { align-self: flex-start; }
+
+section.open { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.card { background: var(--hull); border: 1px solid var(--rule); border-radius: 4px; padding: 14px 16px; min-width: 0; }
+.card h3 { font: 600 12px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-dim); margin: 0 0 10px; }
+.card ol, .card ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.card li code { font-family: var(--mono); font-size: 11.5px; color: #c6d3e2; }
+.foot { font: 400 11px/1.4 var(--mono); color: #61728a; }
+
+@media (max-width: 980px) {
+  .console { grid-template-columns: minmax(0, 1fr); }
+  aside.readout { max-height: none; }
+  .stage { height: 64vh; min-height: 380px; }
+}
+@media (max-width: 560px) {
+  .lbl .s { display: none; }
+  .lbl.sel .s { display: block; }
+  .hint { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="eyebrow">{{Project}} · {{Scope}} · as of {{YYYY-MM-DD}}</div>
+      <h1>{{The claim-shaped title,}} <span>{{with the accent half}}</span></h1>
+    </div>
+    <nav class="views" role="tablist" aria-label="Diagrams" id="views"></nav>
+  </header>
+
+  <div class="console">
+    <div class="stage" id="stage">
+      <canvas id="gl" aria-label="Interactive 3D architecture diagram"></canvas>
+      <div class="labels" id="labels"></div>
+      <div class="hint">Left-drag orbit · right/middle/shift-drag move · R/F up/down · scroll or pinch zoom · click a block</div>
+      <div class="stage-tools">
+        <button class="btn" id="spin" type="button" aria-pressed="true">Auto-orbit on</button>
+        <button class="btn" id="reset" type="button">Reset view</button>
+      </div>
+    </div>
+    <aside class="readout" id="readout" aria-live="polite"></aside>
+  </div>
+
+  <!-- Optional status cards under the stage. Three columns read well: what is built, what is next, what is a known gap. Every line comes from the tracker or the code. Delete the section if you have nothing sourced to put here. -->
+  <section class="open">
+    <div class="card">
+      <h3>Built and on main</h3>
+      <ul>
+        <li>{{Something that is on the main branch, with its commit or tag}}</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Next, in order</h3>
+      <ol>
+        <li><code>{{tracker-id}}</code> {{the next piece of work}}</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h3>Known gaps</h3>
+      <ul>
+        <li><code>{{tracker-id}}</code> {{what is wrong and where it is tracked}}</li>
+      </ul>
+    </div>
+  </section>
+  <div class="foot">Positions are schematic. Code paths are relative to the repo root on the main branch. Screens show placeholder bars, never real content.</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function () {
+  "use strict";
+  const css = getComputedStyle(document.documentElement);
+  const tok = (n) => css.getPropertyValue(n).trim();
+  const COL = {
+    event: tok("--event"), content: tok("--content"), read: tok("--read"), derive: tok("--derive"),
+    built: tok("--built"), partial: tok("--partial"), planned: tok("--planned"), gap: tok("--gap"),
+    rule: tok("--rule"), ink: tok("--ink"), void: tok("--void")
+  };
+  const STATUS_TEXT = { built: "Built", partial: "Partly built", planned: "Planned", gap: "Known gap" };
+  // Legend text for the four edge kinds. Rename to your system's vocabulary; keep one meaning per colour.
+  const EDGE_TEXT = { event: "Fact / event", content: "Bytes (content)", read: "Read path", derive: "Derive / call" };
+  const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // ---------------------------------------------------------------- diagram data
+  // Path prefixes keep `where` entries short and make a rename a one-line change.
+  const A = "src/api/";
+  const D = "src/domain/";
+  const S = "src/storage/";
+
+  // One worked example view. Replace it with your own; add more entries for more tabs.
+  // Field reference: references/data-schema.md. Positions are in scene units; y is up.
+  const DIAGRAMS = [
+    {
+      id: "vertical", short: "Full vertical", key: "01",
+      title: "One request, from the client to a stored record",
+      intro: [
+        "Four floors, read bottom to top. The left half is the write side: a command becomes a fact on the log. The right half, behind the glass wall, is where the payload bytes live.",
+        "Payload crosses the wall in exactly two places, both through the blob store: the handler's PUT on the way in, and the reader on the top floor, which takes a content reference from the left and resolves it to bytes on the right. The log and the projection never hold payload."
+      ],
+      read: [
+        "Cyan lines are facts appended to the log.",
+        "Amber lines carry bytes. One crosses the wall on the way in (the PUT); the other stays behind it, from the blob store up to the reader.",
+        "Green lines are the read path.",
+        "Violet blocks are planned; red blocks are known gaps."
+      ],
+      cam: { target: [0, 5, 0], dist: 28, theta: -0.62, phi: 1.12 },
+      floors: [
+        { y: 0, label: "Client", k: "00" },
+        { y: 3, label: "API", k: "01" },
+        { y: 6, label: "Storage", k: "02" },
+        { y: 9, label: "Read model", k: "03" }
+      ],
+      floorSize: [20, 8],
+      walls: [{ p: [1.6, 5.6, 0], s: [0.06, 5.8, 7.6], label: "Authorization boundary: bytes only through the blob store", lp: [1.6, 8.9, 3.9] }],
+      nodes: [
+        { id: "client", label: "Client", sub: "CLI or browser", p: [0, 0.7, 0], s: [6, 1.2, 2.6], st: "built",
+          what: "Where a request starts. It sends a command and a payload; it never talks to storage directly.",
+          where: [A + "client.rs"] },
+        { id: "handler", label: "Command handler", sub: "validate, then decide()", p: [-4.5, 3.6, 0], s: [3.6, 1, 2.2], st: "built",
+          what: "Validates the command against current state and emits a fact. The payload is handed to the blob store first, then the fact is appended, because an append-only log cannot un-write a reference to bytes that were never stored.",
+          where: [A + "handlers/create.rs", D + "aggregate.rs"],
+          notes: ["Order is the slice's own rule: PUT bytes first, then append the fact."] },
+        { id: "auth", label: "Auth middleware", sub: "who may write · tracked", p: [4.5, 3.6, 0], s: [3.4, 1, 2.2], st: "partial",
+          what: "Checks the caller before a command reaches a handler. Token validation is built; per-resource authorization is tracked and not yet implemented.",
+          where: [A + "middleware/auth.rs", "tracker: EXAMPLE-42"] },
+        { id: "log", label: "Event log", sub: "append-only · one stream per record", p: [-4.5, 6.8, 0], s: [5.4, 1.6, 3.2], st: "built",
+          what: "The source of truth. Facts carry ids and content references, never the payload.",
+          where: [S + "event_log.rs"] },
+        { id: "blobs", label: "Blob store", sub: "content-addressed", p: [5.4, 6.8, 0], s: [5.4, 1.6, 3.2], st: "built",
+          what: "Content-addressed bytes. Reading anything here is the authorization point.",
+          where: [S + "blob_store.rs"] },
+        { id: "proj", label: "Projection", sub: "fold over the log", p: [-4.5, 9.6, 0], s: [3.6, 1, 2.2], st: "built",
+          what: "Current state per record, rebuilt from the log alone. Drop it and replay, and you get the same state back.",
+          where: [D + "projection.rs"] },
+        { id: "reader", label: "Reader", sub: "ref → bytes · hash verified", p: [4.5, 9.6, 0], s: [3.6, 1, 2.2], st: "planned",
+          what: "The single crossing point. Dereferences a record's content reference through the blob store and verifies the hash before anything is shown.",
+          where: ["tracker: EXAMPLE-57"] }
+      ],
+      edges: [
+        { a: "client", b: "auth", k: "event", t: "command + payload" },
+        { a: "auth", b: "handler", k: "derive" },
+        { a: "handler", b: "blobs", k: "content", t: "① PUT bytes" },
+        { a: "handler", b: "log", k: "event", t: "② append fact", bend: [0, 1.6, 0] },
+        { a: "log", b: "proj", k: "derive" },
+        { a: "proj", b: "log", k: "derive", dash: true, t: "drop + replay = same state", bend: [-3, 1.5, -2] },
+        { a: "proj", b: "reader", k: "read", t: "content ref crosses", dash: true },
+        { a: "blobs", b: "reader", k: "content", t: "bytes out, only to the reader", bend: [2.6, 0, 1.2], dash: true }
+      ]
+    }
+  ];
+  // Exposed for the path check in references/build-checklist.md; the page itself never reads it.
+  window.DIAGRAMS = DIAGRAMS;
+
+  // ---------------------------------------------------------------- three setup
+  const canvas = document.getElementById("gl");
+  const stage = document.getElementById("stage");
+  const labelsRoot = document.getElementById("labels");
+  const readout = document.getElementById("readout");
+  const viewsNav = document.getElementById("views");
+
+  if (!window.THREE) {
+    readout.innerHTML = "<h2>3D view unavailable</h2><p>The 3D library did not load. Reload the page to try again.</p>";
+    return;
+  }
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 400);
+  const raycaster = new THREE.Raycaster();
+  const tmpV = new THREE.Vector3();
+
+  const col = (hex) => new THREE.Color(hex);
+
+  function boxEdges(mesh, color, opacity) {
+    const g = new THREE.EdgesGeometry(mesh.geometry);
+    const m = new THREE.LineBasicMaterial({ color: col(color), transparent: true, opacity: opacity });
+    const l = new THREE.LineSegments(g, m);
+    mesh.add(l);
+    return l;
+  }
+
+  function makeLabel(root, cls, html, st) {
+    const el = document.createElement("div");
+    el.className = "lbl " + cls;
+    el.innerHTML = html;
+    if (st) el.style.setProperty("--st", COL[st]);
+    root.appendChild(el);
+    return el;
+  }
+
+  function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+  // A placeholder "screen" texture: title bar and text bars, never real content.
+  function screenTexture() {
+    const c = document.createElement("canvas");
+    c.width = 512; c.height = 290;
+    const g = c.getContext("2d");
+    g.fillStyle = "#0d1620"; g.fillRect(0, 0, 512, 290);
+    g.fillStyle = "#1b2a3a"; g.fillRect(0, 0, 512, 34);
+    g.fillStyle = COL.event; g.fillRect(16, 13, 10, 10);
+    g.fillStyle = "#c9d6e4"; g.fillRect(36, 14, 150, 8);
+    g.fillStyle = "#56677c"; g.fillRect(400, 14, 96, 8);
+    const rows = [0.92, 0.84, 0.88, 0.5, 0, 0.9, 0.78, 0.86, 0.6, 0, 0.82, 0.7];
+    let y = 56;
+    rows.forEach((w, i) => {
+      if (w > 0) { g.fillStyle = i === 0 ? "#e3ebf3" : "#7f90a6"; g.fillRect(24, y, 464 * w, i === 0 ? 11 : 7); }
+      y += i === 0 ? 24 : 17;
+    });
+    g.strokeStyle = COL.content; g.lineWidth = 2; g.strokeRect(1, 1, 510, 288);
+    const t = new THREE.CanvasTexture(c);
+    t.anisotropy = 4;
+    return t;
+  }
+
+  function buildScene(d) {
+    const scene = new THREE.Scene();
+    scene.add(new THREE.HemisphereLight(0xbfd8ff, 0x0a0e14, 0.75));
+    const key = new THREE.DirectionalLight(0xffffff, 0.75);
+    key.position.set(10, 30, 18);
+    scene.add(key);
+    const rim = new THREE.DirectionalLight(0x5fd4e8, 0.25);
+    rim.position.set(-20, 10, -16);
+    scene.add(rim);
+
+    const root = document.createElement("div");
+    root.hidden = true;
+    labelsRoot.appendChild(root);
+
+    const S = { d, scene, root, meshes: [], labels: [], nodes: {}, particles: [], center: new THREE.Vector3() };
+    const [fw, fd] = d.floorSize;
+
+    // floors: one slab per layer, with a grid unless it is a room
+    d.floors.forEach((f) => {
+      const geo = new THREE.BoxGeometry(fw, 0.06, fd);
+      const mat = new THREE.MeshStandardMaterial({ color: 0x13202d, transparent: true, opacity: d.room ? 0.85 : 0.38, roughness: 0.9, metalness: 0.1, depthWrite: false });
+      const m = new THREE.Mesh(geo, mat);
+      m.position.set(0, f.y, 0);
+      scene.add(m);
+      boxEdges(m, "#2e4058", 0.9);
+      if (!d.room) {
+        const grid = new THREE.GridHelper(Math.max(fw, fd), Math.round(Math.max(fw, fd) / 2), 0x1d2b3b, 0x1d2b3b);
+        grid.scale.set(fw / Math.max(fw, fd), 1, fd / Math.max(fw, fd));
+        grid.position.y = f.y + 0.04;
+        grid.material.transparent = true; grid.material.opacity = 0.35;
+        scene.add(grid);
+      }
+      const el = makeLabel(root, "floor", '<span class="n"><span class="k">' + esc(f.k) + "</span>" + esc(f.label) + "</span>");
+      S.labels.push({ el, pos: new THREE.Vector3(-fw / 2 + 0.3, f.y + 0.1, fd / 2), kind: "floor" });
+    });
+
+    // room shell: back wall, two side walls, a desk for scale (room: true views)
+    if (d.room) {
+      const wallMat = new THREE.MeshStandardMaterial({ color: 0x1a2634, roughness: 0.85, metalness: 0.15, transparent: true, opacity: 0.92 });
+      const back = new THREE.Mesh(new THREE.BoxGeometry(fw, 5.4, 0.2), wallMat);
+      back.position.set(0, 2.7, -fd / 2 + 0.1); scene.add(back); boxEdges(back, "#33475f", 0.8);
+      const sideGeo = new THREE.BoxGeometry(0.2, 5.4, fd);
+      const left = new THREE.Mesh(sideGeo, wallMat.clone()); left.material.opacity = 0.55;
+      left.position.set(-fw / 2, 2.7, 0); scene.add(left); boxEdges(left, "#33475f", 0.6);
+      const right = new THREE.Mesh(sideGeo, wallMat.clone()); right.material.opacity = 0.55;
+      right.position.set(fw / 2, 2.7, 0); scene.add(right); boxEdges(right, "#33475f", 0.6);
+      const desk = new THREE.Mesh(new THREE.BoxGeometry(5, 0.9, 1.4), new THREE.MeshStandardMaterial({ color: 0x223246, roughness: 0.7 }));
+      desk.position.set(0, 0.45, fd / 2 - 1.8); scene.add(desk); boxEdges(desk, "#3b5170", 0.7);
+    }
+
+    // walls: translucent boundaries. Default tone is content (amber) for a security or authorization
+    // boundary; `tone` takes any status or flow token, `op` sets opacity, `dash` dashes the outline.
+    // A thin pane (one dimension 0.06) is a wall; a full box frames a package or isolation unit.
+    d.walls.forEach((w) => {
+      const tone = COL[w.tone || "content"];
+      const m = new THREE.Mesh(new THREE.BoxGeometry(w.s[0], w.s[1], w.s[2]),
+        new THREE.MeshStandardMaterial({ color: col(tone), transparent: true, opacity: w.op != null ? w.op : 0.07, roughness: 0.2, depthWrite: false, side: THREE.DoubleSide }));
+      m.position.set(w.p[0], w.p[1], w.p[2]);
+      scene.add(m);
+      const we = boxEdges(m, tone, 0.55);
+      if (w.dash) { we.material = new THREE.LineDashedMaterial({ color: col(tone), dashSize: 0.35, gapSize: 0.25, transparent: true, opacity: 0.7 }); we.computeLineDistances(); }
+      const el = makeLabel(root, "wall", '<span class="n">' + esc(w.label) + "</span>");
+      if (w.tone) { el.style.setProperty("--wt", tone); el.classList.add("toned"); }
+      S.labels.push({ el, pos: new THREE.Vector3(w.lp[0], w.lp[1], w.lp[2]), kind: "wall" });
+    });
+
+    // columns: tall glass slices through the layer slabs, one small cell per layer the slice owns code in
+    (d.columns || []).forEach((c) => {
+      const h = c.h || 9.6;
+      const m = new THREE.Mesh(new THREE.BoxGeometry(2.6, h, 2.6),
+        new THREE.MeshStandardMaterial({ color: col(COL[c.st]), transparent: true, opacity: c.st === "built" ? 0.12 : 0.06, depthWrite: false }));
+      m.position.set(c.x, h / 2, 0.6);
+      scene.add(m);
+      const e = boxEdges(m, COL[c.st], c.st === "built" ? 0.7 : 0.45);
+      if (c.st !== "built") { e.material = new THREE.LineDashedMaterial({ color: col(COL[c.st]), dashSize: 0.25, gapSize: 0.18, transparent: true, opacity: 0.7 }); e.computeLineDistances(); }
+      (c.cells || d.floors.map((f) => f.y + 0.6)).forEach((y) => {
+        const cell = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.5, 1.5), new THREE.MeshStandardMaterial({ color: col(COL[c.st]), transparent: true, opacity: c.st === "built" ? 0.55 : 0.22, roughness: 0.6 }));
+        cell.position.set(c.x, y, 1.2);
+        scene.add(cell);
+      });
+    });
+
+    // nodes: boxes by default; shape: "anchor" (octahedron), "screen" (textured panel), "card" (thin slab)
+    d.nodes.forEach((n) => {
+      const stc = COL[n.st];
+      let geo;
+      if (n.shape === "anchor") geo = new THREE.OctahedronGeometry(0.32);
+      else geo = new THREE.BoxGeometry(n.s[0], n.s[1], n.s[2]);
+      let mat;
+      if (n.shape === "screen") {
+        mat = new THREE.MeshBasicMaterial({ map: screenTexture() });
+      } else {
+        mat = new THREE.MeshStandardMaterial({
+          color: n.st === "planned" ? col("#1b1a33") : col("#162230"),
+          emissive: col(stc), emissiveIntensity: n.st === "planned" ? 0.12 : 0.2,
+          roughness: 0.55, metalness: 0.2, transparent: n.st === "planned", opacity: n.st === "planned" ? 0.55 : 1
+        });
+        if (n.shape === "anchor") { mat.color = col(stc); mat.emissiveIntensity = 0.6; }
+      }
+      const m = new THREE.Mesh(geo, mat);
+      m.position.set(n.p[0], n.p[1], n.p[2]);
+      m.userData.node = n;
+      scene.add(m);
+      let edge = null;
+      if (n.shape !== "anchor") {
+        edge = boxEdges(m, stc, 0.95);
+        if (n.st === "planned") { edge.material = new THREE.LineDashedMaterial({ color: col(stc), dashSize: 0.22, gapSize: 0.14 }); edge.computeLineDistances(); }
+      }
+      // status strip on the front face
+      if (n.shape !== "anchor" && n.shape !== "screen" && n.shape !== "card") {
+        const strip = new THREE.Mesh(new THREE.BoxGeometry(n.s[0] * 0.96, 0.08, 0.02), new THREE.MeshBasicMaterial({ color: col(stc) }));
+        strip.position.set(0, -n.s[1] / 2 + 0.12, n.s[2] / 2 + 0.012);
+        m.add(strip);
+      }
+      S.meshes.push(m);
+      const html = '<span class="n">' + esc(n.label) + '</span><span class="s">' + esc(n.sub || "") + "</span>";
+      const el = makeLabel(root, "node", html, n.st);
+      el.tabIndex = 0;
+      el.setAttribute("role", "button");
+      el.setAttribute("aria-label", n.label + (n.sub ? ", " + n.sub : ""));
+      el.addEventListener("click", (ev) => { ev.stopPropagation(); select(n.id); });
+      el.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); select(n.id); }
+      });
+      const top = n.shape === "anchor" ? 0.45 : (n.shape === "screen" ? n.s[1] / 2 + 0.15 : n.s[1] / 2 + 0.12);
+      const L = { el, pos: new THREE.Vector3(n.p[0], n.p[1] + top, n.p[2]), kind: "node", id: n.id };
+      S.labels.push(L);
+      S.nodes[n.id] = { n, mesh: m, edge, label: L };
+    });
+
+    // edges: a lifted quadratic curve per edge, colour by kind, dashed for reference or planned
+    d.edges.forEach((e) => {
+      const A = S.nodes[e.a], B = S.nodes[e.b];
+      if (!A || !B) { console.warn("edge references unknown node", e); return; }
+      const pa = A.mesh.position.clone(), pb = B.mesh.position.clone();
+      const mid = pa.clone().add(pb).multiplyScalar(0.5);
+      const lift = Math.min(2.4, pa.distanceTo(pb) * 0.12);
+      mid.y += lift;
+      if (e.bend) mid.add(new THREE.Vector3(e.bend[0], e.bend[1], e.bend[2]));
+      const curve = new THREE.QuadraticBezierCurve3(pa, mid, pb);
+      const pts = curve.getPoints(64);
+      const g = new THREE.BufferGeometry().setFromPoints(pts);
+      const c = col(COL[e.k]);
+      const mat = e.dash
+        ? new THREE.LineDashedMaterial({ color: c, dashSize: 0.3, gapSize: 0.2, transparent: true, opacity: 0.85 })
+        : new THREE.LineBasicMaterial({ color: c, transparent: true, opacity: 0.85 });
+      const line = new THREE.Line(g, mat);
+      if (e.dash) line.computeLineDistances();
+      scene.add(line);
+      // pulses show direction: cubes for bytes, spheres for everything else
+      const count = e.dash ? 1 : 2;
+      for (let i = 0; i < count; i++) {
+        const pg = e.k === "content" ? new THREE.BoxGeometry(0.2, 0.2, 0.2) : new THREE.SphereGeometry(0.11, 12, 10);
+        const pm = new THREE.Mesh(pg, new THREE.MeshBasicMaterial({ color: c }));
+        scene.add(pm);
+        S.particles.push({ mesh: pm, curve, t: i / count + Math.random() * 0.2, speed: 0.12 + Math.random() * 0.04 });
+      }
+      if (e.t) {
+        const el = makeLabel(root, "edge", '<span class="n">' + esc(e.t) + "</span>");
+        el.style.setProperty("--ek", COL[e.k]);
+        S.labels.push({ el, pos: curve.getPoint(0.5).add(new THREE.Vector3(0, 0.2, 0)), kind: "edge" });
+      }
+    });
+
+    return S;
+  }
+
+  // ---------------------------------------------------------------- camera control (hand-written orbit)
+  const view = { target: new THREE.Vector3(), dist: 30, theta: 0, phi: 1.1 };
+  let autoSpin = !reduceMotion;
+  const spinBtn = document.getElementById("spin");
+  function setSpin(on) { autoSpin = on; spinBtn.setAttribute("aria-pressed", String(on)); spinBtn.textContent = on ? "Auto-orbit on" : "Auto-orbit off"; }
+  setSpin(autoSpin);
+  spinBtn.addEventListener("click", () => setSpin(!autoSpin));
+
+  function applyCamera() {
+    const sp = Math.sin(view.phi);
+    camera.position.set(
+      view.target.x + view.dist * sp * Math.sin(view.theta),
+      view.target.y + view.dist * Math.cos(view.phi),
+      view.target.z + view.dist * sp * Math.cos(view.theta)
+    );
+    camera.lookAt(view.target);
+  }
+  function resetCamera() {
+    const c = current.d.cam;
+    view.target.set(c.target[0], c.target[1], c.target[2]);
+    view.dist = c.dist; view.theta = c.theta; view.phi = c.phi;
+    if (stage.clientWidth < 620) view.dist *= 1.35;
+  }
+  document.getElementById("reset").addEventListener("click", () => { resetCamera(); });
+
+  // Controls: left-drag orbits; right-drag, middle-drag or shift-drag translates (pans);
+  // two fingers pinch to zoom and drag to translate; arrow keys / WASD pan, R/F (or PageUp/PageDown) move up/down,
+  // +/- zoom, 0/Home resets. Only a left click picks.
+  const pointers = new Map();
+  let dragMoved = 0, pinchStart = 0, distStart = 0, downAt = null, mid = null;
+  function midpoint() {
+    const ps = [...pointers.values()];
+    return { x: (ps[0].x + ps[1].x) / 2, y: (ps[0].y + ps[1].y) / 2 };
+  }
+  canvas.addEventListener("pointerdown", (ev) => {
+    if (ev.button === 1) ev.preventDefault(); // stop the browser's middle-click autoscroll
+    canvas.setPointerCapture(ev.pointerId);
+    pointers.set(ev.pointerId, { x: ev.clientX, y: ev.clientY, btn: ev.button });
+    dragMoved = 0; downAt = { x: ev.clientX, y: ev.clientY, btn: ev.button };
+    if (pointers.size === 2) {
+      const [p1, p2] = [...pointers.values()];
+      pinchStart = Math.hypot(p1.x - p2.x, p1.y - p2.y); distStart = view.dist;
+      mid = midpoint();
+    }
+    canvas.classList.add("dragging");
+  });
+  canvas.addEventListener("pointermove", (ev) => {
+    const p = pointers.get(ev.pointerId);
+    if (!p) { hover(ev); return; }
+    const dx = ev.clientX - p.x, dy = ev.clientY - p.y;
+    p.x = ev.clientX; p.y = ev.clientY;
+    dragMoved += Math.abs(dx) + Math.abs(dy);
+    if (pointers.size === 2) {
+      const [p1, p2] = [...pointers.values()];
+      const dd = Math.hypot(p1.x - p2.x, p1.y - p2.y);
+      if (pinchStart > 0 && dd > 0) view.dist = clamp(distStart * pinchStart / dd, 6, 90);
+      const m = midpoint();
+      if (mid) pan(m.x - mid.x, m.y - mid.y);
+      mid = m;
+    } else if (p.btn === 1 || p.btn === 2 || ev.shiftKey) {
+      pan(dx, dy);
+    } else {
+      view.theta -= dx * 0.006;
+      view.phi = clamp(view.phi - dy * 0.005, 0.2, 1.52);
+    }
+    if (dragMoved > 4 && autoSpin) setSpin(false);
+  });
+  function endPointer(ev) {
+    pointers.delete(ev.pointerId);
+    if (pointers.size < 2) { pinchStart = 0; mid = null; }
+    if (pointers.size === 0) {
+      canvas.classList.remove("dragging");
+      if (dragMoved < 5 && downAt && downAt.btn === 0) pick(ev);
+    }
+  }
+  canvas.addEventListener("pointerup", endPointer);
+  canvas.addEventListener("pointercancel", (ev) => { pointers.delete(ev.pointerId); mid = null; canvas.classList.remove("dragging"); });
+  canvas.addEventListener("auxclick", (ev) => ev.preventDefault());
+  canvas.addEventListener("wheel", (ev) => { ev.preventDefault(); zoom(1 + Math.sign(ev.deltaY) * 0.08); }, { passive: false });
+  canvas.addEventListener("contextmenu", (ev) => ev.preventDefault());
+
+  // Translate the orbit target in screen space: the point under the cursor stays under the cursor.
+  const panRight = new THREE.Vector3(), panUp = new THREE.Vector3();
+  function pan(dx, dy) {
+    const h = Math.max(1, stage.clientHeight);
+    const s = (2 * view.dist * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))) / h;
+    camera.updateMatrixWorld();
+    panRight.setFromMatrixColumn(camera.matrixWorld, 0);
+    panUp.setFromMatrixColumn(camera.matrixWorld, 1);
+    view.target.addScaledVector(panRight, -dx * s);
+    view.target.addScaledVector(panUp, dy * s);
+    if (autoSpin) setSpin(false);
+  }
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function lift(units) { view.target.y += units; if (autoSpin) setSpin(false); }
+  function zoom(f) { view.dist = clamp(view.dist * f, 6, 90); if (autoSpin) setSpin(false); }
+  function orbit(d) { view.theta += d; if (autoSpin) setSpin(false); }
+
+  // Keyboard: the canvas is focusable (click or tab to it; a focus ring shows).
+  canvas.tabIndex = 0;
+  canvas.addEventListener("keydown", (ev) => {
+    const step = 40, up = view.dist * 0.04;
+    const k = ev.key.toLowerCase();
+    if (k === "arrowleft" || k === "a") pan(step, 0);
+    else if (k === "arrowright" || k === "d") pan(-step, 0);
+    else if (k === "arrowup" || k === "w") pan(0, step);
+    else if (k === "arrowdown" || k === "s") pan(0, -step);
+    else if (k === "r" || k === "pageup") lift(up);
+    else if (k === "f" || k === "pagedown") lift(-up);
+    else if (k === "q") orbit(-0.08);
+    else if (k === "e") orbit(0.08);
+    else if (k === "+" || k === "=") zoom(0.92);
+    else if (k === "-" || k === "_") zoom(1.08);
+    else if (k === "0" || k === "home") resetCamera();
+    else return;
+    ev.preventDefault();
+  });
+
+  function ndc(ev) {
+    const r = canvas.getBoundingClientRect();
+    return new THREE.Vector2(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
+  }
+  function hit(ev) {
+    raycaster.setFromCamera(ndc(ev), camera);
+    const hits = raycaster.intersectObjects(current.meshes, false);
+    return hits.length ? hits[0].object.userData.node : null;
+  }
+  function pick(ev) { const n = hit(ev); if (n) select(n.id); }
+  function hover(ev) { const n = hit(ev); canvas.classList.toggle("hovering", !!n); }
+
+  // ---------------------------------------------------------------- readout panel
+  function legendHTML() {
+    return '<div class="legend">' +
+      '<div><h3>Status</h3><div class="row">' +
+      Object.keys(STATUS_TEXT).map((s) => '<span class="chip ' + s + '">' + esc(STATUS_TEXT[s]) + "</span>").join("") +
+      "</div></div>" +
+      '<div><h3>Lines</h3><div class="row">' +
+      Object.keys(EDGE_TEXT).map((k) => '<span class="key" style="--k:var(--' + k + ')"><i></i>' + esc(EDGE_TEXT[k]) + "</span>").join("") +
+      '<span class="key" style="--k:var(--ink-dim)"><i class="dash"></i>Reference or planned</span>' +
+      "</div></div></div>";
+  }
+  function showOverview() {
+    const d = current.d;
+    readout.innerHTML =
+      '<div><div class="eyebrow">View ' + d.key + "</div><h2>" + esc(d.title) + "</h2></div>" +
+      "<div>" + d.intro.map((p) => "<p>" + esc(p) + "</p>").join("") + "</div>" +
+      "<div><h3>How to read it</h3><ul>" + d.read.map((r) => "<li>" + esc(r) + "</li>").join("") + "</ul></div>" +
+      "<p style='color:var(--ink-dim)'>Click any block for what it is and where it lives in the code.</p>" +
+      legendHTML();
+  }
+  let selected = null;
+  function select(id) {
+    const N = current.nodes[id];
+    if (!N) return;
+    if (selected && current.nodes[selected]) setHighlight(current.nodes[selected], false);
+    selected = id;
+    setHighlight(N, true);
+    const n = N.n;
+    readout.innerHTML =
+      '<button class="btn back" type="button" id="back">← ' + esc(current.d.short) + " overview</button>" +
+      '<div><span class="chip ' + n.st + '">' + STATUS_TEXT[n.st] + "</span><h2 style='margin-top:8px'>" + esc(n.label) + "</h2>" +
+      (n.sub ? "<p style='color:var(--ink-dim);font-family:var(--mono);font-size:12px;margin-top:4px'>" + esc(n.sub) + "</p>" : "") + "</div>" +
+      "<div><h3>What it is</h3><p>" + esc(n.what) + "</p></div>" +
+      (n.where && n.where.length ? "<div><h3>Where it lives</h3><div class='paths'>" + n.where.map((w) => "<code>" + esc(w) + "</code>").join("") + "</div></div>" : "") +
+      (n.notes && n.notes.length ? "<div><h3>Notes</h3><ul>" + n.notes.map((x) => "<li>" + esc(x) + "</li>").join("") + "</ul></div>" : "") +
+      legendHTML();
+    document.getElementById("back").addEventListener("click", clearSelection);
+  }
+  function clearSelection() {
+    if (selected && current.nodes[selected]) setHighlight(current.nodes[selected], false);
+    selected = null;
+    showOverview();
+  }
+  function setHighlight(N, on) {
+    N.label.el.classList.toggle("sel", on);
+    const m = N.mesh.material;
+    if (m.emissive) m.emissiveIntensity = on ? 0.75 : (N.n.st === "planned" ? 0.12 : (N.n.shape === "anchor" ? 0.6 : 0.2));
+    N.mesh.scale.setScalar(on ? 1.04 : 1);
+  }
+
+  // ---------------------------------------------------------------- scenes + tabs
+  const scenes = DIAGRAMS.map(buildScene);
+  let current = scenes[0];
+
+  DIAGRAMS.forEach((d, i) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.setAttribute("role", "tab"); b.id = "tab-" + d.id;
+    b.innerHTML = "<b>" + d.key + "</b>" + esc(d.short);
+    b.addEventListener("click", () => activate(i));
+    viewsNav.appendChild(b);
+  });
+
+  function activate(i) {
+    if (selected && current.nodes[selected]) setHighlight(current.nodes[selected], false);
+    selected = null;
+    current.root.hidden = true;
+    current = scenes[i];
+    current.root.hidden = false;
+    [...viewsNav.children].forEach((b, j) => b.setAttribute("aria-selected", String(j === i)));
+    resetCamera();
+    showOverview();
+    try { history.replaceState(null, "", "#" + current.d.id); } catch (e) { /* sandboxed */ }
+  }
+
+  // ---------------------------------------------------------------- loop
+  function resize() {
+    const w = stage.clientWidth, h = stage.clientHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / Math.max(1, h);
+    camera.updateProjectionMatrix();
+  }
+  new ResizeObserver(resize).observe(stage);
+  resize();
+
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    if (autoSpin) view.theta += dt * 0.07;
+    applyCamera();
+    const speedK = reduceMotion ? 0.25 : 1;
+    current.particles.forEach((p) => {
+      p.t = (p.t + dt * p.speed * speedK) % 1;
+      p.curve.getPoint(p.t, p.mesh.position);
+    });
+    renderer.render(current.scene, camera);
+
+    // HTML labels: project each anchor point per frame, scale by distance, hide when off-screen or behind the camera
+    const w = stage.clientWidth, h = stage.clientHeight;
+    current.labels.forEach((L) => {
+      tmpV.copy(L.pos).project(camera);
+      const behind = tmpV.z > 1;
+      if (behind || tmpV.x < -1.3 || tmpV.x > 1.3 || tmpV.y < -1.3 || tmpV.y > 1.3) { L.el.style.visibility = "hidden"; return; }
+      L.el.style.visibility = "visible";
+      const x = (tmpV.x * 0.5 + 0.5) * w, y = (-tmpV.y * 0.5 + 0.5) * h;
+      const d = camera.position.distanceTo(L.pos);
+      const s = clamp(26 / d, 0.62, 1.15);
+      if (L.kind === "floor") L.el.style.transform = "translate(" + x.toFixed(1) + "px," + (y + 4).toFixed(1) + "px) scale(" + s.toFixed(3) + ")";
+      else L.el.style.transform = "translate(" + x.toFixed(1) + "px," + y.toFixed(1) + "px) translate(-50%,-100%) scale(" + s.toFixed(3) + ")";
+      L.el.style.zIndex = String(1000 - Math.round(d * 10));
+      if (L.kind === "edge") L.el.style.opacity = d > 40 ? "0" : "1";
+    });
+    requestAnimationFrame(frame);
+  }
+
+  const hashIdx = DIAGRAMS.findIndex((d) => "#" + d.id === location.hash);
+  activate(hashIdx >= 0 ? hashIdx : 0);
+  requestAnimationFrame(frame);
+})();
+</script>
