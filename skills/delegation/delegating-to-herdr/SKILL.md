@@ -21,6 +21,31 @@ that exit. This skill is for **interactive sessions that live for hours**:
 orchestrators, leads, architects, reviewers that keep a context and talk to
 peers.
 
+## When to Use
+
+- An orchestrator, PM or lead agent hands work to a fresh, long-lived interactive session (a replacement lead, an architect, a reviewer) and the work should keep going after the parent stops.
+- Several leads should run in parallel overnight, each in its own visible workspace.
+- A session's context is past half its window and the work should move to a fresh session from its handoff.
+
+## When NOT to Use
+
+- One-shot, non-interactive tasks that end with a result: use `delegating-to-claude-p` or `delegating-to-codex`.
+- Writing the handoff itself: use `writing-handoffs` first, then this skill to launch from it.
+- Short parallel subtasks inside one session: use in-process subagents; a herdr pane per subtask wastes context and budget.
+- The human has not approved agent-started sessions: ask first, and keep starting sessions by hand until they do.
+
+## Input
+
+| Input | Type | Required | Notes |
+|---|---|---|---|
+| Handoff path | file path, committed to git | yes | What the new session reads first. |
+| Working directory | path | yes | The repo the session works in (`--cwd`). |
+| Role label | string, `[a-z][a-z0-9_-]{0,31}` | yes | Workspace label and agent name, e.g. `architect`. |
+| Orchestrator address | session name | yes | Where the new session checks in. |
+| Current priorities | short text | no | Anything that changed after the handoff was written. |
+| Agent launch command | string | yes | e.g. `claude`, with flags only as the human directs. |
+| herdr server | running (`herdr status`) | yes | The human usually starts it by running `herdr`. |
+
 ## Outcomes we are looking for
 
 1. **Work continues without the human in the loop.** *Signal:* a session
@@ -92,6 +117,13 @@ authority for command syntax; this skill adds the orchestration pattern.
 6. **Log the start** wherever your program keeps its record (a capture, a
    handoff note, a bead comment): role, pane, handoff path, time.
 
+## Output
+
+- One labelled herdr workspace per started session, visible in the human's herdr UI.
+- A named agent in that workspace, briefed with the handoff, in state `working` or `idle`.
+- A check-in message from the new session to the orchestrator, naming its session.
+- A start-log entry in the program's record (role, pane, handoff path, time).
+
 ## Watch without polling the model
 
 ```sh
@@ -136,6 +168,8 @@ launch prompt:
   may reuse a name (for example `dream-ship-v0-17`), but it is a new context.
   Confirm it read the handoff before treating it as the old owner.
 
+- **Starting an implementer directly from the orchestrator.** Two layers then own the same lane and nobody owns its outcome; starting the lead and letting it start workers keeps one owner.
+
 ## Recommended tools and practices (as of 2026-10-17)
 
 ### Outcome: work continues without the human
@@ -168,3 +202,9 @@ launch prompt:
 - `herdr --skill`: herdr's built-in agent guide, the syntax authority
 - [`writing-handoffs`](../writing-handoffs/SKILL.md): what the handoff must carry
 - [`delegating-to-claude-p`](../delegating-to-claude-p/SKILL.md), [`delegating-to-codex`](../delegating-to-codex/SKILL.md): one-shot peers
+
+## Continual improvement
+
+This skill is maintained at
+https://github.com/AgentParadise/agentic-skills/tree/main/skills/delegation/delegating-to-herdr.
+When herdr's CLI changes, `herdr --skill` and the socket API page win; update the recipe here and the dated tools section in the same commit.
