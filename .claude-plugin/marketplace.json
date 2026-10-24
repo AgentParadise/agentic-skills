@@ -1,0 +1,60 @@
+{
+  "name": "agentic-skills",
+  "description": "AgentParadise Claude Code plugins. Each entry points at the repo that owns the plugin, so updates land without copying files here.",
+  "owner": {
+    "name": "NeuralEmpowerment",
+    "url": "https://github.com/AgentParadise"
+  },
+  "plugins": [
+    {
+      "name": "sdlc",
+      "description": "Software Development Lifecycle: commit, review, QA, testing, security hooks, git hooks, and infrastructure configuration",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/AgentParadise/agentic-workspace.git",
+        "path": "plugins/sdlc"
+      },
+      "category": "development"
+    },
+    {
+      "name": "delegation",
+      "description": "Handing work off to other agents: autonomous claude -p and codex exec delegation, plus session-to-session handoff documents",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/AgentParadise/agentic-workspace.git",
+        "path": "plugins/delegation"
+      },
+      "category": "development"
+    },
+    {
+      "name": "observability",
+      "description": "Full-spectrum agent observability: hooks every Claude Code lifecycle event and emits structured JSONL events",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/AgentParadise/agentic-workspace.git",
+        "path": "plugins/observability"
+      },
+      "category": "observability"
+    },
+    {
+      "name": "workspace",
+      "description": "Observable isolated workspaces: lifecycle and observability hooks emitting structured JSONL events",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/AgentParadise/agentic-workspace.git",
+        "path": "plugins/workspace"
+      },
+      "category": "development"
+    },
+    {
+      "name": "notifications",
+      "description": "Push notifications for Claude Code: ntfy.sh, macOS native, and Pushover with sound themes. Frozen at the archived Agentic Primitives copy until it gets an active home.",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/AgentParadise/agentic-primitives.git",
+        "path": "plugins/notifications"
+      },
+      "category": "observability"
+    }
+  ]
+}

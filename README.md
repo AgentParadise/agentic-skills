@@ -67,6 +67,22 @@ Releases are immutable. Replace `main` with a tag, for example `v0.2.0`, to inst
 npx skills add https://github.com/AgentParadise/agentic-skills/tree/v0.2.0/skills/sdlc --skill '*' -a claude-code -a codex -y
 ```
 
+## Claude Code plugins
+
+This repo is also the Claude Code plugin marketplace for AgentParadise. [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json) lists each plugin, and each entry points at the repo that owns it, so updates arrive without copying files here.
+
+```bash
+claude plugin marketplace add AgentParadise/agentic-skills
+claude plugin install sdlc@agentic-skills
+```
+
+| Plugin | Source |
+| --- | --- |
+| `sdlc`, `delegation`, `observability`, `workspace` | [Agentic Workspace](https://github.com/AgentParadise/agentic-workspace) `plugins/` |
+| `notifications` | Archived [Agentic Primitives](https://github.com/AgentParadise/agentic-primitives) `plugins/notifications`, frozen |
+
+Pull updates with `claude plugin marketplace update agentic-skills`, or turn on auto-update for it under **Marketplaces** in `/plugin`. Migrating from the archived `agentic-primitives` marketplace: uninstall `<plugin>@agentic-primitives`, install `<plugin>@agentic-skills`, then `claude plugin marketplace remove agentic-primitives`.
+
 ## Collections
 
 Collections are folders, not separate packages. Vercel Skills discovers each `SKILL.md` directly from the selected folder. Every skill can also be installed individually with `--skill <name>`.
