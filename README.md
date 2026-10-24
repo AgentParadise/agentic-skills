@@ -81,7 +81,7 @@ claude plugin install sdlc@agentic-skills
 | `sdlc`, `delegation`, `observability`, `workspace` | [Agentic Workspace](https://github.com/AgentParadise/agentic-workspace) `plugins/` |
 | `notifications` | Archived [Agentic Primitives](https://github.com/AgentParadise/agentic-primitives) `plugins/notifications`, frozen |
 
-Pull updates with `claude plugin marketplace update agentic-skills`, or turn on auto-update for it under **Marketplaces** in `/plugin`. Migrating from the archived `agentic-primitives` marketplace: uninstall `<plugin>@agentic-primitives`, install `<plugin>@agentic-skills`, then `claude plugin marketplace remove agentic-primitives`.
+Pull updates with `claude plugin marketplace update agentic-skills` then `claude plugin update <plugin>@agentic-skills`, or turn on auto-update for it under **Marketplaces** in `/plugin`. Migrating from the archived `agentic-primitives` marketplace: uninstall `<plugin>@agentic-primitives`, install `<plugin>@agentic-skills`. Run `claude plugin marketplace remove agentic-primitives` only once nothing else is installed from it, since removal uninstalls its remaining plugins (`research`, `meta`, `docs`, and `experiments` have no entry here).
 
 ## Collections
 
