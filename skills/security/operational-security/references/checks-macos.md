@@ -26,7 +26,7 @@ Flag listeners on `*`/`0.0.0.0` and on mesh IPs; name the owning process.
 ```bash
 ls -lT ~/Library/LaunchAgents /Library/LaunchAgents /Library/LaunchDaemons
 find ~/Library/LaunchAgents /Library/LaunchAgents /Library/LaunchDaemons -newermt "$(date -v-14d +%F)" -type f
-plutil -extract ProgramArguments json -o - <plist>    # what each new item runs
+plutil -extract ProgramArguments json -o - <plist>    # what each new item runs; mask tokens/keys in args before quoting
 launchctl list | awk '$3 !~ /^com\.apple\./'
 sudo sfltool dumpbtm                                   # login items / BTM (root)
 ```
@@ -45,7 +45,7 @@ Chromium family: `~/Library/Application Support/<Browser>/<Profile>/Extensions/<
 
 ## Infostealer indicators (AMOS, MacSync, SHub class)
 ```bash
-ps axo pid,user,args | grep -Ei 'osascript|curl .*\| *(ba|z)?sh|base64 -d|/tmp/|/Users/Shared/'
+ps axo pid,user,args | grep -Ei 'osascript|curl .*\| *(ba|z)?sh|base64 -d|/tmp/|/Users/Shared/' | cut -c1-160   # args can hold credentials: mask before quoting
 find /tmp /private/var/tmp /Users/Shared ~/Library/Application\ Support -maxdepth 2 -name '.*' -type f -perm -u+x
 ps axo comm= | sort -u | grep '^/' | while read p; do codesign -v "$p" 2>/dev/null || echo "$p"; done
 ```
