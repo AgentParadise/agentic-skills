@@ -95,6 +95,7 @@ Collections are folders, not separate packages. Vercel Skills discovers each `SK
 | [Meta](skills/meta) | Skill and agent instruction design | [authoring-agents-md](skills/meta/authoring-agents-md), [authoring-skills](skills/meta/authoring-skills), [skill-testing](skills/meta/skill-testing) |
 | [Experiments](skills/experiments) | Hypothesis-driven experiments | [running-experiments](skills/experiments/running-experiments) |
 | [Observability](skills/observability) | Langfuse learning loops | [langfuse-learning-loops](skills/observability/langfuse-learning-loops) |
+| [Security](skills/security) | Operational security audits, agent guardrails | [operational-security](skills/security/operational-security) |
 
 For example, preview a collection online without installing:
 
