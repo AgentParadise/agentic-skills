@@ -1,0 +1,45 @@
+# OPSEC inventory: machine-specific targets for the operational-security skill.
+# Copy to ~/.config/opsec/inventory.toml (or set OPSEC_INVENTORY). Keep it private:
+# it maps your infrastructure. Never put secrets here, only names and aliases.
+
+[machine]
+# "personal" | "managed". If omitted, the skill detects MDM/EDR and decides.
+kind = "personal"
+# Where reports go. Relative paths resolve against the skill's working dir.
+report_dir = "reports"
+
+[notify]
+# How to reach the operator when anything is RED. Leave empty to only report in-session.
+# Use a command that holds its own secret/topic, so the topic never appears in prompts.
+command = ""            # e.g. "~/bin/page -t 'opsec: RED' -p high"
+
+[scope]
+# Directories whose git repos get dependency + secret scans.
+repo_roots = ["~/Code/example-org/app", "~/Code/tools/*"]
+# Extra paths to secret-scan besides the defaults (shell rc, ~/.config, registry rc files, agent dirs).
+extra_secret_paths = []
+# Skip these (vendored, huge, or employer-owned when policy forbids scanning).
+exclude = ["**/node_modules", "**/target", "**/.venv"]
+
+[mesh]
+# Device names you expect on your tailnet; anything else is flagged.
+expected_devices = ["laptop", "homelab", "vps-1"]
+stale_after_days = 30
+
+# One block per owned host reachable over your EXISTING ssh config. Read-only commands only.
+[[hosts]]
+name = "homelab"
+ssh = "homelab"                       # ssh alias or user@host
+os = "macos"                          # macos | linux | windows
+# ssh_config = "~/.ssh/other.conf"    # if the alias lives in a separate file (-F)
+# access_contact = "agent or person to ask how to reach it"
+# notes = "maintenance window, do not restart containers"
+
+[[hosts]]
+name = "vps-1"
+ssh = "vps-1"
+os = "linux"
+public = true                         # internet-facing: exposure findings weigh more
+
+[password_manager]
+name = "1password"                    # or bitwarden, keychain-only, none
